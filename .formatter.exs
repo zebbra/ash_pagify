@@ -4,9 +4,11 @@
   import_deps: [
     :ash,
     :ash_phoenix,
-    :ash_uuid
+    :ash_uuid,
+    :phoenix
   ],
   plugins: [
+    Phoenix.LiveView.HTMLFormatter,
     Spark.Formatter,
     Styler
   ]

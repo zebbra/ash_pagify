@@ -25,6 +25,9 @@ defmodule AshPagify.MixProject do
       {:ash_postgres, "~> 1.5.30"},
       {:ash_uuid, "~> 0.7.0"},
 
+      # Phoenix Framework
+      {:phoenix, "~> 1.7.14"},
+
       # Testing and Linting
       {:credo, "~> 1.7.7", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1.4", only: [:dev, :test], runtime: false},
@@ -44,6 +47,7 @@ defmodule AshPagify.MixProject do
   end
 
   defp elixirc_paths(:test), do: elixirc_paths(:dev) ++ ["test/support"]
+
   defp elixirc_paths(_), do: ["lib"]
 
   # Aliases are shortcuts or tasks specific to the current project.
