@@ -1,30 +1,50 @@
+# This file is responsible for configuring your application
+# and its dependencies with the aid of the Config module.
+#
+# This configuration file is loaded before any dependency and
+# is restricted to this project.
+
+# General application configuration
 import Config
 
-config :ash_pagify, ecto_repos: [AshPagify.Repo]
+config :ash_pagify,
+  ash_apis: [],
+  env: Mix.env()
 
-config :spark,
-  formatter: [
-    remove_parens?: true,
-    "Ash.Resource": [
-      section_order: [
-        :postgres,
-        :resource,
-        :code_interface,
-        :actions,
-        :policies,
-        :pub_sub,
-        :preparations,
-        :changes,
-        :validations,
-        :multitenancy,
-        :attributes,
-        :relationships,
-        :calculations,
-        :aggregates,
-        :identities
-      ]
-    ],
-    "Ash.Domain": [section_order: [:resources, :policies, :authorization, :domain, :execution]]
+config :ash_uuid, :otp_app, :ash_pagify
+
+config :ash_pagify, :ash_uuid,
+  version: 7,
+  encoded?: true,
+  prefixed?: true,
+  migration_default?: true
+
+config :logger, :console,
+  format: "$time $metadata[$level] $message\n",
+  metadata: [:request_id]
+
+config :spark, :formatter,
+  remove_parens?: true,
+  "Ash.Resource": [
+    type: Ash.Resource,
+    section_order: [
+      :authentication,
+      :token,
+      :attributes,
+      :relationships,
+      :calculations,
+      :aggregates,
+      :state_machine,
+      :preparations,
+      :actions,
+      :changes,
+      :pub_sub,
+      :code_interface,
+      :policies,
+      :postgres,
+      :graphql,
+      :json_api
+    ]
   ]
 
 import_config "#{config_env()}.exs"

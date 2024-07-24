@@ -24,3 +24,19 @@ ash_pagify-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# Ignore language server artefacts
+.elixir_ls
+.elixir-tools
+
+# ignore local .env
+.env
+
+# Ignore logfiles
+*.log
+
+# Ignore Mac OS files
+.DS_Store
+
+# Ignore test reports
+test/reports/*.xml
