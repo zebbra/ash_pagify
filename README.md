@@ -25,3 +25,13 @@ end
 - **Filtering**: Apply user-input filters to your queries using a simple map syntax. Allows complex data filtering using multiple conditions, operators, and fields. Also incooperates with `AshPhoenix.FilterForm` to provide a simple way to build complex filter user interfaces.
 - **Sorting**: Sort your queries by multiple fields and any directions.
 - **UI helpers and URL builders**: AshPagify provides a `AshPagify.Meta` struct with information about the current page, total pages, and more. This information can be used to build pagination links in your UI. Further, `AshPagify` provides the `AshPagify.Components` module with headless table and pagination components to easily build sortable tables and pagination links in your Phoenix LiveView. The `AshPagify.FilterForm` module provides a simple way to build filter forms for your LiveView.
+
+## Release Management
+
+We use [git_opts](https://hexdocs.pm/git_ops/readme.html) to manage our releases. To create a new release, run:
+
+```bash
+mix git_ops.release
+```
+
+This will bump the version, create a new tag, and push the changes to the repository. The GitHub action will then build and publish the new version to Hex.
