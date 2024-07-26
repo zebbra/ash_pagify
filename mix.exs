@@ -63,6 +63,31 @@ defmodule AshPagify.MixProject do
       ],
       skip_undefined_reference_warnings_on: [
         "CHANGELOG.md"
+      ],
+      nest_modules_by_prefix: [
+        AshPagify.Error,
+        AshPagify.Components
+      ],
+      groups_for_modules: [
+        Core: [
+          AshPagify,
+          AshPagify.Meta,
+          AshPagify.Misc,
+          AshPagify.Tsearch,
+          AshPagify.Validation
+        ],
+        Components: [
+          AshPagify.Components,
+          AshPagify.Components.Pagination,
+          AshPagify.Components.Table
+        ],
+        Filters: [
+          AshPagify.FilterForm
+        ],
+        Errors: [
+          AshPagify.Error,
+          ~r/AshPagify.Error\./
+        ]
       ]
     ]
   end
@@ -113,8 +138,7 @@ defmodule AshPagify.MixProject do
       # Setup Project
       setup: [
         "deps.get",
-        "check",
-        "docs"
+        "check"
       ]
     ]
   end
