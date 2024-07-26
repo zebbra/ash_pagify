@@ -328,6 +328,7 @@ defmodule AshPagify.Misc do
 
   def atomize_keys(not_a_map, _), do: not_a_map
 
+  # sobelow_skip ["DOS.StringToAtom"]
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defp atomize_key(key, opts) when is_binary(key) do
     existing? = Keyword.get(opts, :existing?)

@@ -704,6 +704,7 @@ defmodule AshPagify do
   @spec parse(Ash.Query.t() | Ash.Resource.t(), AshPagify.t(), Keyword.t()) :: Keyword.t()
   def parse(query_or_resource, ash_pagify, opts \\ [])
 
+  # sobelow_skip ["SQL.Query"]
   def parse(%Ash.Query{} = q, %AshPagify{} = ash_pagify, opts) do
     opts = Keyword.put(opts, :query, query(q, ash_pagify, opts))
     paginate(q, ash_pagify, opts)
@@ -843,6 +844,7 @@ defmodule AshPagify do
           non_neg_integer()
   def count(query_or_resource, ash_pagify, opts \\ [])
 
+  # sobelow_skip ["SQL.Query"]
   def count(%Ash.Query{resource: r} = q, %AshPagify{} = ash_pagify, opts) do
     if count = opts[:count] do
       count
@@ -1658,6 +1660,7 @@ defmodule AshPagify do
           Ash.Query.t()
   def validated_query(query_or_resource, map_or_ash_pagify, opts \\ [])
 
+  # sobelow_skip ["SQL.Query"]
   def validated_query(%Ash.Query{} = q, map_or_ash_pagify, opts) do
     ash_pagify = validate!(q, map_or_ash_pagify, opts)
     query(q, ash_pagify, opts)
