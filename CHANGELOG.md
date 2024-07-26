@@ -5,6 +5,19 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.1.1](https://github.com/zebbra/ash_pagify/compare/v0.1.0...v0.1.1) (2024-07-26)
+
+
+
+
+### Bug Fixes:
+
+* cicd: exclude dialyzer from mix check
+
+* tests: add tests/reports directory
+
+* workflows: use ubuntu-latest as runner for now
+
 ## [v0.1.0](https://github.com/zebbra/ash_pagify/compare/v0.1.0...v0.1.0) (2024-07-26)
 
 

@@ -12,7 +12,7 @@ Welcome! AshPagify adds full-text search, scoping, filtering, ordering, and pagi
 ```elixir
 def deps do
   [
-    {:ash_pagify, "~> 0.1.0"}
+    {:ash_pagify, "~> 0.1.1"}
   ]
 end
 ```
