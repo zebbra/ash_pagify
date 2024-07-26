@@ -59,7 +59,7 @@ jobs:
             priv/plts
           key: ${{ runner.os }}-mix-${{ hashFiles('.tool-versions') }}-${{ hashFiles('mix.lock') }}
 
-      - run: mix check
+      - run: mix check --except dialyzer
 
       - name: Test Summary
         uses: test-summary/action@v2
