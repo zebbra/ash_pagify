@@ -91,6 +91,7 @@ defmodule AshPagify.MixProject do
       {:floki, ">= 0.36.0", only: :test},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
       {:git_ops, "~> 2.6.1", only: [:dev]},
+      {:git_hooks, "~> 0.7.3", only: [:dev], runtime: false},
 
       # Utilities and Helpers
       # TODO Remove upon Ash v3 migration

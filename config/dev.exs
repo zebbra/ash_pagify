@@ -11,3 +11,15 @@ config :git_ops,
   # Pass in `true` to use `"README.md"` or a string to customize
   manage_readme_version: "README.md",
   version_tag_prefix: "v"
+
+# Configure git hooks. They can be installed manuallu by running `mix git_hooks.install`
+config :git_hooks,
+  auto_install: true,
+  verbose: true,
+  hooks: [
+    pre_push: [
+      tasks: [
+        {:cmd, "mix check"}
+      ]
+    ]
+  ]
