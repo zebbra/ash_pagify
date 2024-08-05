@@ -65,8 +65,8 @@ defmodule AshPagify.MixProject do
         "CHANGELOG.md"
       ],
       nest_modules_by_prefix: [
-        AshPagify.Error,
-        AshPagify.Components
+        AshPagify.Components,
+        AshPagify.Error
       ],
       groups_for_modules: [
         Core: [
@@ -78,8 +78,7 @@ defmodule AshPagify.MixProject do
         ],
         Components: [
           AshPagify.Components,
-          AshPagify.Components.Pagination,
-          AshPagify.Components.Table
+          ~r/AshPagify.Components\./
         ],
         Filters: [
           AshPagify.FilterForm
