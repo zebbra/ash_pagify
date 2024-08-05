@@ -147,7 +147,7 @@ filters that can be applied to the query.
 
 We allow full-text search using the `tsvector` column in PostgreSQL. To enable full-text search,
 you need to either `use AshPagify.Tsearch` in your module or implement the `full_text_search`,
-`full_text_search_rankg`, `tsquery`, and `tsvector` calculations as described in `AshPagify.Tsearch`
+`full_text_search_rank`, `tsquery`, and `tsvector` calculations as described in `AshPagify.Tsearch`
 (tsvector calculation  is always mandatory).
 
 ```elixir
@@ -268,7 +268,7 @@ If the `:action` option is set (to perform a custom read action), the fourth arg
 
 We allow full-text search using the `tsvector` column in PostgreSQL. To enable full-text search,
 you need to either `use AshPagify.Tsearch` in your module or implement the `full_text_search`,
-`full_text_search_rankg`, `tsquery`, and `tsvector` calculations as described in `AshPagify.Tsearch`
+`full_text_search_rank`, `tsquery`, and `tsvector` calculations as described in `AshPagify.Tsearch`
 (tsvector calculation  is always mandatory).
 
 ```elixir
@@ -356,6 +356,13 @@ This translates to the following query parameter string:
 ?search=John
 ```
 
+You can use the `AshPagify.set_search/3` function to set the search query in the
+`AshPagify` struct.
+
+```elixir
+ash_pagify = AshPagify.set_search(%AshPagify{}, "John")
+```
+
 ## Pagination
 
 You can specify an offset to start from and a limit to the number of results.
@@ -370,6 +377,14 @@ This translates to the following query parameter string:
 ?offset=100&limit=20
 ```
 
+You can use the `AshPagify.set_offset/2` and `AshPagify.set_limit/3` functions to set
+the offset and limit in the `AshPagify` struct.
+
+```elixir
+ash_pagify = AshPagify.set_offset(%AshPagify{}, 100)
+ash_pagify = AshPagify.set_limit(ash_pagify, 20)
+```
+
 ## Scoping
 
 To apply predefined filters to a query, you can set the `:scopes` parameter. `:scopes`
@@ -378,16 +393,19 @@ is used to look up the predefined filter. If the filter is found, it is applied 
 the query. If the filter is not found, an error is raised.
 
 ```elixir
-iex> params = %{scopes: %{role: :admin}}
-iex> {:ok, ash_pagify} = AshPagify.validate(Post, params)
-iex> ash_pagify.scopes
-%{role: :admin, status: :all}
+%{scopes: %{role: :admin}}
 ```
 
 This translates to the following query parameter string:
 
 ```URL
 ?scopes[role]=admin
+```
+
+You can use the `AshPagify.set_scope/3` function to set the scopes in the `AshPagify` struct.
+
+```elixir
+ash_pagify = AshPagify.set_scope(%AshPagify{}, %{role: :admin})
 ```
 
 ## Filter forms
@@ -397,19 +415,19 @@ by a filter form component using the `AshPagify.FilterForm` module. `AshPagify.F
 can be used to convert the form filter map into a query map.
 
 ```elixir
-iex> params = %{filter_form: %{"field" => "name", "operator" => "eq", "value" => "Post 1"}}
-iex> {:ok, {results, meta}} = AshPagify.validate_and_run(Post, params)
-iex> meta.total_count
-1
-iex> [post] = results
-iex> post.name
-"Post 1"
+%{filter_form: %{"field" => "name", "operator" => "eq", "value" => "Post 1"}}
 ```
 
 This translates to the following query parameter string:
 
 ```URL
 ?filter_form[name][eq]=Post%201
+```
+
+You can use the `AshPagify.set_filter_form/3` function to set the filter form in the `AshPagify` struct.
+
+```elixir
+ash_pagify = AshPagify.set_filter_form(%AshPagify{}, %{"field" => "name", "operator" => "eq", "value" => "Post 1"})
 ```
 
 Check the `AshPhoenix.FilterForm` documentation for more information.
@@ -430,16 +448,19 @@ one of the following prefixes to the field name:
 If no order directions are given, `:asc` is used as default.
 
 ```elixir
-iex> params = %{order_by: ["name", "--author"]}
-iex> {:ok, ash_pagify} = AshPagify.validate(Post, params)
-iex> ash_pagify.order_by
-[{:name, :asc}, {:author, :desc_nils_last}]
+%{order_by: ["name", "--author"]}
 ```
 
 This translates to the following query parameter string:
 
 ```URL
 ?order_by=[]name&oder_by[]=--author
+```
+
+You can use the `AshPagify.push_order/3` function to set the order by clause in the `AshPagify` struct.
+
+```elixir
+ash_pagify = AshPagify.push_order(%AshPagify{}, "name")
 ```
 
 ## Internal parameters
