@@ -8,18 +8,17 @@ defmodule AshPagify.Misc do
   environment.
   """
   @spec get_global_opts(atom) :: keyword
-  def get_global_opts(component, module \\ :ash_pagify) when component in [:pagination, :table, :full_text_search] do
-    case opts_func(component, module) do
+  def get_global_opts(component) when component in [:pagination, :table, :full_text_search] do
+    case opts_func(component) do
       nil -> []
       {module, func} -> apply(module, func, [])
       config -> config
     end
   end
 
-  defp opts_func(component, module) do
+  defp opts_func(component) do
     :ash_pagify
-    |> Application.get_env(module, [])
-    |> Keyword.get(component, [])
+    |> Application.get_env(component, [])
     |> maybe_get_opts()
   end
 

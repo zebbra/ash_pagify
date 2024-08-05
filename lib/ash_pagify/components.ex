@@ -83,7 +83,7 @@ defmodule AshPagify.Components do
   module/function tuple in `config/config.exs`.
 
   ```elixir
-  config :my_app :ash_pagify,
+  config :ash_pagify,
     pagination: [opts: {MyAppWeb.CoreComponents, :pagination_opts}],
     table: [opts: {MyAppWeb.CoreComponents, :table_opts}]
   ```
