@@ -96,13 +96,13 @@ defmodule AshPagify.MixProject do
   defp deps do
     [
       # Ash Framework
-      {:ash, "~> 2.21.15"},
-      {:ash_phoenix, "~> 1.3.7"},
-      {:ash_postgres, "~> 1.5.30"},
-      {:ash_uuid, "~> 0.7.0"},
+      {:ash, "~> 2.0"},
+      {:ash_phoenix, "~> 1.3"},
+      {:ash_postgres, "~> 1.5"},
+      {:ash_uuid, "~> 0.7"},
 
       # Phoenix Framework
-      {:phoenix, "~> 1.7.14"},
+      {:phoenix, "~> 1.7"},
 
       # Testing and Linting
       {:ex_check, "~> 0.16", only: [:dev, :test]},
