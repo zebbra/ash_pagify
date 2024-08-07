@@ -95,10 +95,9 @@ defmodule AshPagify.MixProject do
   defp deps do
     [
       # Ash Framework
-      {:ash, "~> 3.3.3", override: true},
-      {:ash_phoenix, "~> 2.1.1"},
-      {:ash_postgres, "~> 2.1.17", override: true},
-      {:ash_uuid, "~> 1.1.1", override: true},
+      {:ash, "~> 3.3"},
+      {:ash_phoenix, "~> 2.1"},
+      {:ash_postgres, "~> 2.1"},
 
       # SAT Solvers
       {:picosat_elixir, "~> 0.2", optional: true},

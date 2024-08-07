@@ -154,7 +154,7 @@ you need to either `use AshPagify.Tsearch` in your module or implement the `full
 defmodule YourApp.Resource.Post
   # only required if you want to implement full-text search
   use AshPagify.Tsearch
-  require Ash.Query
+  require Ash.Expr
 
   @default_limit 15
   def default_limit, do: @default_limit

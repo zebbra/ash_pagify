@@ -38,7 +38,7 @@ defmodule AshPagify.Factory.Post do
   end
 
   attributes do
-    uuid_attribute :id, public?: true
+    uuid_primary_key :id, writable?: true
     attribute :name, :string, allow_nil?: false, public?: true
     attribute :title, :string, public?: true
     attribute :text, :string, public?: true

@@ -11,14 +11,6 @@ config :ash_pagify,
   ash_domains: [],
   env: Mix.env()
 
-config :ash_uuid, :otp_app, :ash_pagify
-
-config :ash_pagify, :ash_uuid,
-  version: 7,
-  encoded?: true,
-  prefixed?: true,
-  migration_default?: true
-
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]

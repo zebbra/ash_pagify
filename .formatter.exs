@@ -4,7 +4,6 @@
   import_deps: [
     :ash,
     :ash_phoenix,
-    :ash_uuid,
     :phoenix
   ],
   plugins: [

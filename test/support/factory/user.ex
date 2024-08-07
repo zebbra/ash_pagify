@@ -10,7 +10,7 @@ defmodule AshPagify.Factory.User do
   end
 
   attributes do
-    uuid_attribute :id, public?: true
+    uuid_primary_key :id, writable?: true
     attribute :name, :string, allow_nil?: false, public?: true
     attribute :email, :string, allow_nil?: false, public?: true
     attribute :age, :integer, public?: true
