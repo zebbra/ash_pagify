@@ -8,7 +8,7 @@
 <!-- MDOC -->
 
 AshPagify is an Elixir library designed to easily add full-text search, scoping, filtering,
-ordering, and pagination APIs for the [Ash Framework](https://hexdocs.pm/ash)
+ordering, and pagination APIs for the [Ash Framework](https://hexdocs.pm/ash).
 
 It takes concepts from `Flop`, `Flop.Phoenix`, `Ash` and `AshPhoenix.FilterForm` and
 combines them into a single library.
@@ -179,15 +179,17 @@ defmodule YourApp.Resource.Post
   end
 
   calculations do
-    # provide the default tsvector calculation for full-text search
+    # provide your default `tsvector` calculation for full-text search
     calculate :tsvector,
-      AshPostgres.Tsvector,
-        expr(
-          fragment("to_tsvector('simple', coalesce(?, '')) || to_tsvector('simple', coalesce(?, ''))",
-          name,
-          title
-        )
-      )
+              AshPostgres.Tsvector,
+              expr(
+                fragment(
+                  "to_tsvector('simple', coalesce(?, '')) || to_tsvector('simple', coalesce(?, ''))",
+                  name,
+                  title
+                )
+              ),
+              public?: true
   end
   #...
 end
@@ -274,13 +276,15 @@ you need to either `use AshPagify.Tsearch` in your module or implement the `full
 ```elixir
 # provide the default tsvector calculation for full-text search
 calculate :tsvector,
-  AshPostgres.Tsvector,
-    expr(
-      fragment("to_tsvector('simple', coalesce(?, '')) || to_tsvector('simple', coalesce(?, ''))",
-      name,
-      title
-    )
-  )
+          AshPostgres.Tsvector,
+          expr(
+            fragment(
+              "to_tsvector('simple', coalesce(?, '')) || to_tsvector('simple', coalesce(?, ''))",
+              name,
+              title
+            )
+          ),
+          public?: true
 ```
 
 Or if you want to use a generated tsvector column, you can replace the fields
@@ -288,7 +292,7 @@ part with the name of your generated tsvector column:
 
 ```elixir
 # use a tsvector column from the database
-calculate :tsvector, AshPostgres.Tsvector, expr(fragment("?", tsv))
+calculate :tsvector, AshPostgres.Tsvector, expr(tsv), public?: true
 ```
 
 You can also configure `dynamic` tsvectors based on user input. Have a look at the

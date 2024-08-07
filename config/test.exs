@@ -1,5 +1,9 @@
 import Config
 
+config :ash_pagify,
+  ash_domains: [AshPagify.Factory.Domain],
+  env: Mix.env()
+
 config :logger, level: :warning
 
 # config :ash, disable_async?: true

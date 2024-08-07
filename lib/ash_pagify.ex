@@ -10,6 +10,7 @@ defmodule AshPagify do
   alias AshPagify.Misc
   alias AshPagify.Validation
 
+  require Ash.Expr
   require Ash.Query
   require Logger
 
@@ -718,18 +719,20 @@ defmodule AshPagify do
   def search(%Ash.Query{} = q, %AshPagify{search: ""}, _opts), do: q
 
   def search(%Ash.Query{} = q, %AshPagify{search: search} = ash_pagify, opts) do
-    tsquery = AshPagify.Tsearch.tsquery(search, opts)
-    tsquery = Ash.Query.expr(tsquery(search: tsquery))
-    tsvector = AshPagify.Tsearch.tsvector(opts)
+    tsquery_str = AshPagify.Tsearch.tsquery(search, opts)
+    tsquery_expr = Ash.Expr.expr(tsquery(search: ^tsquery_str))
+    tsvector_expr = AshPagify.Tsearch.tsvector(opts)
 
     q
-    |> Ash.Query.filter(full_text_search(tsvector: tsvector, tsquery: tsquery))
-    |> maybe_put_ts_rank(ash_pagify, tsvector, tsquery)
+    |> Ash.Query.filter(full_text_search(tsvector: ^tsvector_expr, tsquery: ^tsquery_expr))
+    |> maybe_put_ts_rank(ash_pagify, tsvector_expr, tsquery_expr)
   end
 
-  defp maybe_put_ts_rank(%Ash.Query{} = q, %AshPagify{order_by: order_by}, tsvector, tsquery)
+  defp maybe_put_ts_rank(%Ash.Query{} = q, %AshPagify{order_by: order_by}, tsvector_expr, tsquery_expr)
        when is_nil(order_by) or order_by == [] do
-    Ash.Query.sort(q, full_text_search_rank: {:desc, %{tsvector: tsvector, tsquery: tsquery}})
+    Ash.Query.sort(q,
+      full_text_search_rank: {%{tsvector: tsvector_expr, tsquery: tsquery_expr}, :desc}
+    )
   end
 
   defp maybe_put_ts_rank(%Ash.Query{} = q, _, _, _), do: q

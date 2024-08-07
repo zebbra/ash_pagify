@@ -95,10 +95,13 @@ defmodule AshPagify.MixProject do
   defp deps do
     [
       # Ash Framework
-      {:ash, "~> 2.0"},
-      {:ash_phoenix, "~> 1.3"},
-      {:ash_postgres, "~> 1.5"},
-      {:ash_uuid, "~> 0.7"},
+      {:ash, "~> 3.3.3", override: true},
+      {:ash_phoenix, "~> 2.1.1"},
+      {:ash_postgres, "~> 2.1.17", override: true},
+      {:ash_uuid, "~> 1.1.1", override: true},
+
+      # SAT Solvers
+      {:picosat_elixir, "~> 0.2", optional: true},
 
       # Phoenix Framework
       {:phoenix, "~> 1.7"},
@@ -116,10 +119,6 @@ defmodule AshPagify.MixProject do
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
       {:git_ops, "~> 2.6.1", only: [:dev]},
       {:git_hooks, "~> 0.7.3", only: [:dev], runtime: false},
-
-      # Utilities and Helpers
-      # TODO Remove upon Ash v3 migration
-      {:splode, "~> 0.2.4"},
 
       # Documentation
       {:ex_doc, "~> 0.34.2", runtime: false}

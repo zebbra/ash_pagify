@@ -8,7 +8,7 @@
 import Config
 
 config :ash_pagify,
-  ash_apis: [],
+  ash_domains: [],
   env: Mix.env()
 
 config :ash_uuid, :otp_app, :ash_pagify

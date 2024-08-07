@@ -9,17 +9,19 @@ defmodule AshPagify.Tsearch do
   ```elixir
   defmodule MyApp.Resource do
     use AshPagify.Tsearch
-    require Ash.Query
+    require Ash.Expr
 
     calculations do
       calculate :tsvector,
-        AshPostgres.Tsvector,
-          expr(
-            fragment("to_tsvector('simple', coalesce(?, '')) || to_tsvector('simple', coalesce(?, ''))",
-            name,
-            title
-          )
-        )
+                AshPostgres.Tsvector,
+                expr(
+                  fragment(
+                    "to_tsvector('simple', coalesce(?, '')) || to_tsvector('simple', coalesce(?, ''))",
+                    name,
+                    title
+                  )
+                ),
+                public?: true
       end
     end
   end
@@ -38,14 +40,15 @@ defmodule AshPagify.Tsearch do
   ```elixir
   defmodule MyApp.Resource do
     use AshPagify.Tsearch, only: [:full_text_search, :full_text_search_rank]
-    require Ash.Query
+    require Ash.Expr
 
     calculations do
       calculate :tsquery,
-        AshPostgres.Tsquery,
-          # use english dictionary unaccent PostgreSQL extension
-          expr(fragment("to_tsquery('english', unaccent(?))", ^arg(:search)))
-        )
+                AshPostgres.Tsquery,
+                # use english dictionary unaccent PostgreSQL extension
+                expr(fragment("to_tsquery('english', unaccent(?))", ^arg(:search))) do
+        public? true
+        argument :search, :string, allow_expr?: true, allow_nil?: false
       end
 
       ...
@@ -135,13 +138,13 @@ defmodule AshPagify.Tsearch do
   ```elixir
   defmodule MyApp.Resource do
     use AshPagify.Tsearch
-    require Ash.Query
+    require Ash.Expr
 
     def full_text_search do
       [
         tsvector_column: [
-          custom_tsvector: Ash.Query.expr(custom_tsvector),
-          another_custom_tsvector: Ash.Query.expr(another_custom_tsvector),
+          custom_tsvector: Ash.Expr.expr(custom_tsvector),
+          another_custom_tsvector: Ash.Expr.expr(another_custom_tsvector),
         ]
       ]
     end
@@ -149,33 +152,39 @@ defmodule AshPagify.Tsearch do
     calculations do
       # default tsvector calculation
       calculate :tsvector,
-        AshPostgres.Tsvector,
-          expr(
-            fragment("to_tsvector('simple', coalesce(?, '')) || to_tsvector('simple', coalesce(?, ''))",
-            name,
-            title
-          )
-        )
+                AshPostgres.Tsvector,
+                expr(
+                  fragment(
+                    "to_tsvector('simple', coalesce(?, '')) || to_tsvector('simple', coalesce(?, ''))",
+                    name,
+                    title
+                  )
+                ),
+                public?: true
       end
 
       # custom tsvector calculation
       calculate :custom_tsvector,
-        AshPostgres.Tsvector,
-          expr(
-            fragment("to_tsvector('simple', coalesce(?, ''))",
-            name
-          )
-        )
+                AshPostgres.Tsvector,
+                expr(
+                  fragment(
+                    "to_tsvector('simple', coalesce(?, ''))",
+                    name
+                  )
+                ),
+                public?: true
       end
 
       # another custom tsvector calculation
       calculate :another_custom_tsvector,
-        AshPostgres.Tsvector,
-          expr(
-            fragment("to_tsvector('simple', coalesce(?, ''))",
-            title
-          )
-        )
+                AshPostgres.Tsvector,
+                expr(
+                  fragment(
+                    "to_tsvector('simple', coalesce(?, ''))",
+                    title
+                  )
+                ),
+                public?: true
       end
     end
   end
@@ -194,7 +203,7 @@ defmodule AshPagify.Tsearch do
 
   alias AshPagify.Misc
 
-  require Ash.Query
+  require Ash.Expr
 
   @disallowed_tsquery_characters ~r/['?\\:‘’ʻʼ\|\&]/u
 
@@ -285,28 +294,28 @@ defmodule AshPagify.Tsearch do
     coalesce_tsvector(tsvector, tsvector_column)
   end
 
-  defp coalesce_tsvector(nil, nil), do: Ash.Query.expr(tsvector)
-  defp coalesce_tsvector(_, nil), do: Ash.Query.expr(tsvector)
+  defp coalesce_tsvector(nil, nil), do: Ash.Expr.expr(tsvector)
+  defp coalesce_tsvector(_, nil), do: Ash.Expr.expr(tsvector)
 
   defp coalesce_tsvector(key, tsvector_column) when is_binary(key) and is_list(tsvector_column) do
     coalesce_tsvector(String.to_existing_atom(key), tsvector_column)
   rescue
-    ArgumentError -> Ash.Query.expr(tsvector)
+    ArgumentError -> Ash.Expr.expr(tsvector)
   end
 
   defp coalesce_tsvector(key, tsvector_column) when is_atom(key) and is_list(tsvector_column) do
-    Keyword.get(tsvector_column, key, Ash.Query.expr(tsvector))
+    Keyword.get(tsvector_column, key, Ash.Expr.expr(tsvector))
   end
 
   defp coalesce_tsvector(nil, tsvector_column) do
     if is_tuple(tsvector_column) or is_list(tsvector_column) do
-      Ash.Query.expr(tsvector)
+      Ash.Expr.expr(tsvector)
     else
       tsvector_column
     end
   end
 
-  defp coalesce_tsvector(_, _), do: Ash.Query.expr(tsvector)
+  defp coalesce_tsvector(_, _), do: Ash.Expr.expr(tsvector)
 
   @doc """
   Returns the tsquery expression for the given search term and options.
@@ -403,8 +412,6 @@ defmodule AshPagify.Tsearch do
   defp blank?(t), do: String.trim(t) == ""
 
   defmacro __using__(opts \\ []) do
-    require Ash.Query
-
     only = Keyword.get(opts, :only, [])
 
     quote do
@@ -413,6 +420,7 @@ defmodule AshPagify.Tsearch do
           calculate :full_text_search,
                     :boolean,
                     expr(fragment("(? @@ ?)", ^arg(:tsvector), ^arg(:tsquery))) do
+            public? true
             argument :tsvector, AshPostgres.Tsvector, allow_expr?: true, allow_nil?: false
             argument :tsquery, AshPostgres.Tsquery, allow_expr?: true, allow_nil?: false
           end
@@ -424,6 +432,7 @@ defmodule AshPagify.Tsearch do
           calculate :full_text_search_rank,
                     :float,
                     expr(fragment("ts_rank(?, ?)", ^arg(:tsvector), ^arg(:tsquery))) do
+            public? true
             argument :tsvector, AshPostgres.Tsvector, allow_expr?: true, allow_nil?: false
             argument :tsquery, AshPostgres.Tsquery, allow_expr?: true, allow_nil?: false
           end
@@ -435,6 +444,7 @@ defmodule AshPagify.Tsearch do
           calculate :tsquery,
                     AshPostgres.Tsquery,
                     expr(fragment("to_tsquery('simple', ?)", ^arg(:search))) do
+            public? true
             argument :search, :string, allow_expr?: true, allow_nil?: false
           end
         end

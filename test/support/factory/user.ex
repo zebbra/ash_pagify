@@ -2,7 +2,7 @@ defmodule AshPagify.Factory.User do
   @moduledoc false
   use Ash.Resource,
     data_layer: Ash.DataLayer.Ets,
-    api: AshPagify.Factory.Api,
+    domain: AshPagify.Factory.Domain,
     extensions: [AshUUID]
 
   ets do
@@ -10,10 +10,10 @@ defmodule AshPagify.Factory.User do
   end
 
   attributes do
-    uuid_attribute :id
-    attribute :name, :string, allow_nil?: false
-    attribute :email, :string, allow_nil?: false
-    attribute :age, :integer
+    uuid_attribute :id, public?: true
+    attribute :name, :string, allow_nil?: false, public?: true
+    attribute :email, :string, allow_nil?: false, public?: true
+    attribute :age, :integer, public?: true
   end
 
   preparations do
@@ -22,11 +22,11 @@ defmodule AshPagify.Factory.User do
   end
 
   actions do
+    default_accept :*
     defaults [:create, :read, :update, :destroy]
   end
 
   code_interface do
-    define_for AshPagify.Factory.Api
     define :read
     define :create
     define :update

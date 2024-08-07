@@ -2,17 +2,17 @@ defmodule AshPagify.Factory.Comment do
   @moduledoc false
   use Ash.Resource,
     data_layer: Ash.DataLayer.Ets,
-    api: AshPagify.Factory.Api,
+    domain: AshPagify.Factory.Domain,
     extensions: [AshUUID]
 
   use AshPagify.Tsearch, only: [:full_text_search]
 
-  require Ash.Query
+  require Ash.Expr
 
   @full_text_search [
     prefix: false,
     any_word: true,
-    tsvector_column: Ash.Query.expr(custom_tsvector)
+    tsvector_column: Ash.Expr.expr(custom_tsvector)
   ]
   def full_text_search, do: @full_text_search
 
@@ -21,9 +21,9 @@ defmodule AshPagify.Factory.Comment do
   end
 
   attributes do
-    uuid_attribute :id
-    attribute :body, :string, allow_nil?: false
-    attribute :text, :string
+    uuid_attribute :id, public?: true
+    attribute :body, :string, allow_nil?: false, public?: true
+    attribute :text, :string, public?: true
   end
 
   relationships do
@@ -47,7 +47,8 @@ defmodule AshPagify.Factory.Comment do
                   body,
                   text
                 )
-              )
+              ),
+              public?: true
   end
 
   preparations do
@@ -56,6 +57,7 @@ defmodule AshPagify.Factory.Comment do
   end
 
   actions do
+    default_accept :*
     defaults [:create]
 
     read :read do
@@ -73,7 +75,6 @@ defmodule AshPagify.Factory.Comment do
   end
 
   code_interface do
-    define_for AshPagify.Factory.Api
     define :read
     define :by_post, args: [:post_id]
     define :create

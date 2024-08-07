@@ -484,8 +484,8 @@ defmodule AshPagify.ValidationTest do
                :filters => nil,
                :errors => [
                  filters: [
-                   %Ash.Error.Query.NoSuchAttributeOrRelationship{},
-                   %Ash.Error.Query.NoSuchAttributeOrRelationship{}
+                   %Ash.Error.Query.NoSuchField{},
+                   %Ash.Error.Query.NoSuchField{}
                  ]
                ]
              } =
@@ -501,8 +501,8 @@ defmodule AshPagify.ValidationTest do
                :filters => %Ash.Filter{},
                :errors => [
                  filters: [
-                   %Ash.Error.Query.NoSuchAttributeOrRelationship{},
-                   %Ash.Error.Query.NoSuchAttributeOrRelationship{}
+                   %Ash.Error.Query.NoSuchField{},
+                   %Ash.Error.Query.NoSuchField{}
                  ]
                ]
              } =
@@ -587,7 +587,7 @@ defmodule AshPagify.ValidationTest do
                order_by: [name: :desc_nils_last],
                errors: [
                  order_by: [
-                   %Ash.Error.Query.NoSuchAttribute{name: "non_existent", resource: Post}
+                   %Ash.Error.Query.NoSuchField{field: "non_existent", resource: Post}
                  ]
                ]
              } =

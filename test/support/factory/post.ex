@@ -2,12 +2,12 @@ defmodule AshPagify.Factory.Post do
   @moduledoc false
   use Ash.Resource,
     data_layer: Ash.DataLayer.Ets,
-    api: AshPagify.Factory.Api,
+    domain: AshPagify.Factory.Domain,
     extensions: [AshUUID]
 
   use AshPagify.Tsearch
 
-  require Ash.Query
+  require Ash.Expr
 
   @default_limit 15
   def default_limit, do: @default_limit
@@ -28,7 +28,7 @@ defmodule AshPagify.Factory.Post do
   def full_text_search do
     [
       tsvector_column: [
-        custom_tsvector: Ash.Query.expr(custom_tsvector)
+        custom_tsvector: Ash.Expr.expr(custom_tsvector)
       ]
     ]
   end
@@ -38,25 +38,24 @@ defmodule AshPagify.Factory.Post do
   end
 
   attributes do
-    uuid_attribute :id
-    attribute :name, :string, allow_nil?: false
-    attribute :title, :string
-    attribute :text, :string
-    attribute :author, :string
-    attribute :age, :integer
+    uuid_attribute :id, public?: true
+    attribute :name, :string, allow_nil?: false, public?: true
+    attribute :title, :string, public?: true
+    attribute :text, :string, public?: true
+    attribute :author, :string, public?: true
+    attribute :age, :integer, public?: true
+    attribute :tsv, :string, allow_nil?: true, public?: false, writable?: false
 
     # allow sorting by inserted_at/updated_at
-    timestamps(private?: false, writable?: false)
+    timestamps(public?: true, writable?: false)
   end
 
   relationships do
-    has_many :comments, AshPagify.Factory.Comment
+    has_many :comments, AshPagify.Factory.Comment, public?: true
   end
 
   calculations do
-    calculate :tsvector,
-              AshPostgres.Tsvector,
-              expr(fragment("to_tsvector('simple', coalesce(?, ''))", title))
+    calculate :tsvector, AshPostgres.Tsvector, expr(tsv), public?: true
 
     calculate :custom_tsvector,
               AshPostgres.Tsvector,
@@ -66,15 +65,17 @@ defmodule AshPagify.Factory.Post do
                   name,
                   text
                 )
-              )
+              ),
+              public?: true
 
     calculate :add_age, :integer, expr(fragment("age + ?", ^arg(:add))) do
+      public? true
       argument :add, :integer, allow_nil?: false
     end
   end
 
   aggregates do
-    count :comments_count, :comments
+    count :comments_count, :comments, public?: true
   end
 
   preparations do
@@ -83,6 +84,8 @@ defmodule AshPagify.Factory.Post do
   end
 
   actions do
+    default_accept :*
+
     read :read do
       primary? true
       argument :sort, :string, allow_nil?: true
@@ -97,7 +100,6 @@ defmodule AshPagify.Factory.Post do
   end
 
   code_interface do
-    define_for AshPagify.Factory.Api
     define :read
     define :create
   end

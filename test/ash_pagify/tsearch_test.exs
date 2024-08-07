@@ -5,7 +5,7 @@ defmodule AshPagify.TsearchTest do
 
   alias AshPagify.Factory.Comment
 
-  require Ash.Query
+  require Ash.Expr
 
   doctest AshPagify.Tsearch, import: true
 
@@ -24,14 +24,14 @@ defmodule AshPagify.TsearchTest do
                negation: true,
                prefix: false,
                any_word: true,
-               tsvector_column: Ash.Query.expr(custom_tsvector)
+               tsvector_column: Ash.Expr.expr(custom_tsvector)
              ]
     end
   end
 
   describe "tsvector/1" do
     test "returns default tsvector if no options are provided" do
-      assert AshPagify.Tsearch.tsvector() == Ash.Query.expr(tsvector)
+      assert AshPagify.Tsearch.tsvector() == Ash.Expr.expr(tsvector)
     end
 
     test "returns default tsvector if custom tsvector is passed but now tsvector_column is defined" do
@@ -42,7 +42,7 @@ defmodule AshPagify.TsearchTest do
         ]
       ]
 
-      assert AshPagify.Tsearch.tsvector(opts) == Ash.Query.expr(tsvector)
+      assert AshPagify.Tsearch.tsvector(opts) == Ash.Expr.expr(tsvector)
     end
 
     test "returns default tsvector if custom tsvector is passed and tsvector_column is []" do
@@ -53,29 +53,29 @@ defmodule AshPagify.TsearchTest do
         ]
       ]
 
-      assert AshPagify.Tsearch.tsvector(opts) == Ash.Query.expr(tsvector)
+      assert AshPagify.Tsearch.tsvector(opts) == Ash.Expr.expr(tsvector)
     end
 
     test "returns tsvector_column if no custom tsvector is specified but tsvector_column is configured" do
       opts = [
         full_text_search: [
-          tsvector_column: Ash.Query.expr(custom_tsvector)
+          tsvector_column: Ash.Expr.expr(custom_tsvector)
         ]
       ]
 
-      assert AshPagify.Tsearch.tsvector(opts) == Ash.Query.expr(custom_tsvector)
+      assert AshPagify.Tsearch.tsvector(opts) == Ash.Expr.expr(custom_tsvector)
     end
 
     test "returns default tsvector if custom tsvector is not passed and tsvector_column is configured but it is a list" do
       opts = [
         full_text_search: [
           tsvector_column: [
-            custom: Ash.Query.expr(custom_tsvector)
+            custom: Ash.Expr.expr(custom_tsvector)
           ]
         ]
       ]
 
-      assert AshPagify.Tsearch.tsvector(opts) == Ash.Query.expr(tsvector)
+      assert AshPagify.Tsearch.tsvector(opts) == Ash.Expr.expr(tsvector)
     end
 
     test "returns custom tsvector from tsvector_column list" do
@@ -83,12 +83,12 @@ defmodule AshPagify.TsearchTest do
         full_text_search: [
           tsvector: :custom,
           tsvector_column: [
-            custom: Ash.Query.expr(custom_tsvector)
+            custom: Ash.Expr.expr(custom_tsvector)
           ]
         ]
       ]
 
-      assert AshPagify.Tsearch.tsvector(opts) == Ash.Query.expr(custom_tsvector)
+      assert AshPagify.Tsearch.tsvector(opts) == Ash.Expr.expr(custom_tsvector)
     end
 
     test "returns custom tsvector from tsvector_column list with string key" do
@@ -96,12 +96,12 @@ defmodule AshPagify.TsearchTest do
         full_text_search: [
           tsvector: "custom",
           tsvector_column: [
-            custom: Ash.Query.expr(custom_tsvector)
+            custom: Ash.Expr.expr(custom_tsvector)
           ]
         ]
       ]
 
-      assert AshPagify.Tsearch.tsvector(opts) == Ash.Query.expr(custom_tsvector)
+      assert AshPagify.Tsearch.tsvector(opts) == Ash.Expr.expr(custom_tsvector)
     end
 
     test "returns default tsvector if tsvector_column list and key is configured but do not match" do
@@ -109,12 +109,12 @@ defmodule AshPagify.TsearchTest do
         full_text_search: [
           tsvector: :custom_not_existing,
           tsvector_column: [
-            custom: Ash.Query.expr(custom_tsvector)
+            custom: Ash.Expr.expr(custom_tsvector)
           ]
         ]
       ]
 
-      assert AshPagify.Tsearch.tsvector(opts) == Ash.Query.expr(tsvector)
+      assert AshPagify.Tsearch.tsvector(opts) == Ash.Expr.expr(tsvector)
     end
   end
 

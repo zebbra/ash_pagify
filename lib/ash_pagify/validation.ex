@@ -509,7 +509,7 @@ defmodule AshPagify.Validation do
 
       {:error, error} ->
         params = add_error(params, :filters, error)
-        filters = remove_key(filters, error.attribute_or_relationship)
+        filters = remove_key(filters, error.field)
         replace_invalid_filters(filters, params, resource)
     end
   end
@@ -570,7 +570,7 @@ defmodule AshPagify.Validation do
       iex> AshPagify.Error.clear_stacktrace(errors)
       [
         order_by: [
-          %Ash.Error.Query.NoSuchAttribute{name: "non_existent", resource: Post}
+          %Ash.Error.Query.NoSuchField{field: "non_existent", resource: Post}
         ]
       ]
   """
@@ -640,7 +640,7 @@ defmodule AshPagify.Validation do
 
       {:error, error} ->
         params = add_error(params, :order_by, error)
-        order_by = List.delete(order_by, error.name)
+        order_by = List.delete(order_by, error.field)
         replace_invalid_order_by(order_by, params, resource)
     end
   end

@@ -4,12 +4,12 @@ defmodule AshPagifyTest do
 
   import Assertions
 
-  alias AshPagify.Factory.Api
   alias AshPagify.Factory.Comment
   alias AshPagify.Factory.Post
   alias AshPagify.Factory.User
   alias AshPagify.Meta
 
+  require Ash.Expr
   require Ash.Query
 
   doctest AshPagify, import: true
@@ -21,7 +21,7 @@ defmodule AshPagifyTest do
       %{name: "Post 3", author: "Doe", comments: ["Second", "Third", "Another"]}
     ]
 
-    Api.bulk_create(posts, Post, :create)
+    Ash.bulk_create(posts, Post, :create)
     :ok
   end
 
@@ -265,15 +265,20 @@ defmodule AshPagifyTest do
       ash_pagify = %AshPagify{search: "Post 1"}
       query = Ash.Query.new(Post)
 
-      tsvector = AshPagify.Tsearch.tsvector()
-      tsquery = Ash.Query.expr(tsquery(search: AshPagify.Tsearch.tsquery("Post 1")))
+      tsvector_expr = AshPagify.Tsearch.tsvector()
+      tsquery_str = AshPagify.Tsearch.tsquery("Post 1")
+      tsquery_expr = Ash.Expr.expr(tsquery(search: ^tsquery_str))
 
       assert AshPagify.query(query, ash_pagify) == %Ash.Query{
                resource: AshPagify.Factory.Post,
-               filter: Ash.Query.filter(Post, full_text_search(tsvector: tsvector, tsquery: tsquery)).filter,
+               filter:
+                 Ash.Query.filter(
+                   Post,
+                   full_text_search(tsvector: ^tsvector_expr, tsquery: ^tsquery_expr)
+                 ).filter,
                sort:
                  Ash.Query.sort(Post,
-                   full_text_search_rank: {:desc, %{tsvector: tsvector, tsquery: tsquery}}
+                   full_text_search_rank: {%{tsvector: tsvector_expr, tsquery: tsquery_expr}, :desc}
                  ).sort
              }
     end
@@ -282,12 +287,17 @@ defmodule AshPagifyTest do
       ash_pagify = %AshPagify{search: "Post 1", order_by: :name}
       query = Ash.Query.new(Post)
 
-      tsvector = AshPagify.Tsearch.tsvector()
-      tsquery = Ash.Query.expr(tsquery(search: AshPagify.Tsearch.tsquery("Post 1")))
+      tsvector_expr = AshPagify.Tsearch.tsvector()
+      tsquery_str = AshPagify.Tsearch.tsquery("Post 1")
+      tsquery_expr = Ash.Expr.expr(tsquery(search: ^tsquery_str))
 
       assert AshPagify.query(query, ash_pagify) == %Ash.Query{
                resource: AshPagify.Factory.Post,
-               filter: Ash.Query.filter(Post, full_text_search(tsvector: tsvector, tsquery: tsquery)).filter,
+               filter:
+                 Ash.Query.filter(
+                   Post,
+                   full_text_search(tsvector: ^tsvector_expr, tsquery: ^tsquery_expr)
+                 ).filter,
                sort: Ash.Query.sort(Post, name: :asc).sort
              }
     end
@@ -562,9 +572,7 @@ defmodule AshPagifyTest do
                ~s"%{offset: 0, filters: #Ash.Filter<name == \"Post 1\">, limit: 15, scopes: %{status: :all}}"
 
       assert [%Ash.Error.Query.InvalidLimit{limit: -1}] = Keyword.get(meta.errors, :limit)
-
-      assert [%Ash.Error.Query.NoSuchAttributeOrRelationship{attribute_or_relationship: :other}] =
-               Keyword.get(meta.errors, :filters)
+      assert [%Ash.Error.Query.NoSuchField{field: :other}] = Keyword.get(meta.errors, :filters)
     end
 
     test "returns error and original params if ash_pagify is invalid" do
@@ -583,9 +591,7 @@ defmodule AshPagifyTest do
              } == meta.params
 
       assert [%Ash.Error.Query.InvalidLimit{limit: -1}] = Keyword.get(meta.errors, :limit)
-
-      assert [%Ash.Error.Query.NoSuchAttributeOrRelationship{attribute_or_relationship: :other}] =
-               Keyword.get(meta.errors, :filters)
+      assert [%Ash.Error.Query.NoSuchField{field: :other}] = Keyword.get(meta.errors, :filters)
     end
 
     test "returns data and meta data" do
@@ -674,9 +680,7 @@ defmodule AshPagifyTest do
       assert inspect(filters) == ~s"#Ash.Filter<name == \"Post 1\">"
 
       assert [%Ash.Error.Query.InvalidLimit{limit: -1}] = Keyword.get(meta.errors, :limit)
-
-      assert [%Ash.Error.Query.NoSuchAttributeOrRelationship{attribute_or_relationship: :other}] =
-               Keyword.get(meta.errors, :filters)
+      assert [%Ash.Error.Query.NoSuchField{field: :other}] = Keyword.get(meta.errors, :filters)
     end
 
     test "returns error and original params if parameters are invalid" do
@@ -696,9 +700,7 @@ defmodule AshPagifyTest do
              } == meta.params
 
       assert [%Ash.Error.Query.InvalidLimit{limit: -1}] = Keyword.get(meta.errors, :limit)
-
-      assert [%Ash.Error.Query.NoSuchAttributeOrRelationship{attribute_or_relationship: :other}] =
-               Keyword.get(meta.errors, :filters)
+      assert [%Ash.Error.Query.NoSuchField{field: :other}] = Keyword.get(meta.errors, :filters)
     end
   end
 
@@ -726,9 +728,7 @@ defmodule AshPagifyTest do
       assert %{limit: -1, filters: %{name: "Post 1", other: "John"}} == error.params
 
       assert [%Ash.Error.Query.InvalidLimit{limit: -1}] = Keyword.get(error.errors, :limit)
-
-      assert [%Ash.Error.Query.NoSuchAttributeOrRelationship{attribute_or_relationship: :other}] =
-               Keyword.get(error.errors, :filters)
+      assert [%Ash.Error.Query.NoSuchField{field: :other}] = Keyword.get(error.errors, :filters)
     end
   end
 
@@ -1212,13 +1212,13 @@ defmodule AshPagifyTest do
   end
 
   defp assert_map_query_equals_full_text_search(map_query, search) do
-    tsvector = AshPagify.Tsearch.tsvector()
-    tsquery = Ash.Query.expr(tsquery(search: search))
+    tsvector_expr = AshPagify.Tsearch.tsvector()
+    tsquery_expr = Ash.Expr.expr(tsquery(search: ^search))
 
     assert AshPagify.query_for_filters_map(Post, map_query) ==
              Post
-             |> Ash.Query.filter(full_text_search(tsvector: tsvector, tsquery: tsquery))
-             |> Ash.Query.sort(full_text_search_rank: {:desc, %{tsvector: tsvector, tsquery: tsquery}})
+             |> Ash.Query.filter(full_text_search(tsvector: ^tsvector_expr, tsquery: ^tsquery_expr))
+             |> Ash.Query.sort(full_text_search_rank: {%{tsvector: tsvector_expr, tsquery: tsquery_expr}, :desc})
   end
 
   defp assert_post_names(ash_pagify, names, opts \\ []) do
@@ -1228,9 +1228,8 @@ defmodule AshPagifyTest do
   end
 
   defp assert_page_opts(ash_pagify, expected, opts) do
-    %Ash.Page.Offset{rerun: {_, opts}} = AshPagify.all(Post, ash_pagify, opts)
+    %Ash.Page.Offset{rerun: {%Ash.Query{page: page}, _}} = AshPagify.all(Post, ash_pagify, opts)
 
-    page = Keyword.get(opts, :page, [])
     assert_lists_equal(expected, page)
   end
 
@@ -1241,9 +1240,9 @@ defmodule AshPagifyTest do
   end
 
   defp assert_comment_page_opts(ash_pagify, expected, opts) do
-    %Ash.Page.Offset{rerun: {_, opts}} = AshPagify.all(Comment, ash_pagify, opts)
+    %Ash.Page.Offset{rerun: {%Ash.Query{page: page}, _}} =
+      AshPagify.all(Comment, ash_pagify, opts)
 
-    page = Keyword.get(opts, :page, [])
     assert_lists_equal(expected, page)
   end
 end
