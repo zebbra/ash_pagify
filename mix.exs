@@ -83,9 +83,6 @@ defmodule AshPagify.MixProject do
         Filters: [
           AshPagify.FilterForm
         ],
-        Types: [
-          AshPagify.Type.SearchQuery
-        ],
         Errors: [
           AshPagify.Error,
           ~r/AshPagify.Error\./
