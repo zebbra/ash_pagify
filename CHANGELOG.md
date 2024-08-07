@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v1.0.1](https://github.com/zebbra/ash_pagify/compare/v1.0.0...v1.0.1) (2024-08-07)
+
+
+
+
+### Bug Fixes:
+
+* undo unstaged changes
+
 ## [v1.0.0](https://github.com/zebbra/ash_pagify/compare/v0.1.2...v1.0.0) (2024-08-07)
 ### Breaking Changes:
 
