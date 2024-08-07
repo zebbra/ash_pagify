@@ -111,44 +111,43 @@ end
 ## Global configuration
 
 You can set some global options like the default_limit via the application
-environment. All global options can be overridden by passing them directly to
-the functions.
+environment. All global options can be overridden by setting them
+on the resource itself or by passing them directly to the functions.
 
 ```elixir
 config :ash_pagify,
   default_limit: 50,
   max_limit: 1000,
-  replace_invalid_params?: true,
-  ash_pagify_scopes: %{
+  scopes: %{
     role: [
       %{name: :all, filter: nil},
       %{name: :admin, filter: %{role: "admin"}},
       %{name: :user, filter: %{role: "user"}}
     ]
   },
-  reset_on_filter?: true,
   full_text_search: [
     negation: true,
     prefix: true,
     any_word: false
-  ]
+  ],
+  reset_on_filter?: true,
+  replace_invalid_params?: true,
+  table: [],
+  pagination: []
 ```
 
 See `t:AshPagify.option/0` for a description of all available options.
 
 ## Resource configuration
 
-You need to add the `pagination macro` call to the action of the resource that you
+All settings described in the global configuration can be overridden in the resource
+module. For this, you need to define the `@ash_pagify_options` module attribute (and
+it's corresponding function to expose the configuration) and set the options you want
+to override.
+
+Also, you need to add the `pagination macro` call to the action of the resource that you
 want to be paginated. The macro call is used to set the default limit, offset and
 other options for the pagination.
-
-Furthermore, you can define scopes in the resource module. Scopes are predefined
-filters that can be applied to the query.
-
-We allow full-text search using the `tsvector` column in PostgreSQL. To enable full-text search,
-you need to either `use AshPagify.Tsearch` in your module or implement the `full_text_search`,
-`full_text_search_rank`, `tsquery`, and `tsvector` calculations as described in `AshPagify.Tsearch`
-(tsvector calculation  is always mandatory).
 
 ```elixir
 defmodule YourApp.Resource.Post
@@ -156,23 +155,23 @@ defmodule YourApp.Resource.Post
   use AshPagify.Tsearch
   require Ash.Expr
 
-  @default_limit 15
-  def default_limit, do: @default_limit
-
-  @ash_pagify_scopes %{
-    role: [
-      %{name: :all, filter: nil},
-      %{name: :admin, filter: %{author: "John"}},
-      %{name: :user, filter: %{author: "Doe"}}
+  @ash_pagify_options {
+    default_limit: 15,
+    scopes: [
+      role: [
+        %{name: :all, filter: nil},
+        %{name: :admin, filter: %{author: "John"}},
+        %{name: :user, filter: %{author: "Doe"}}
+      ]
     ]
   }
-  def ash_pagify_scopes, do: @ash_pagify_scopes
+  def ash_pagify_options, do: @ash_pagify_options
 
   actions do
     read :read do
       #...
       pagination offset?: true,
-                default_limit: @default_limit,
+                default_limit: @ash_pagify_options.default_limit,
                 countable: true,
                 required?: false
     end

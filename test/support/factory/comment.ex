@@ -9,12 +9,14 @@ defmodule AshPagify.Factory.Comment do
 
   require Ash.Expr
 
-  @full_text_search [
-    prefix: false,
-    any_word: true,
-    tsvector_column: Ash.Expr.expr(custom_tsvector)
-  ]
-  def full_text_search, do: @full_text_search
+  @ash_pagify_options %{
+    full_text_search: [
+      prefix: false,
+      any_word: true,
+      tsvector_column: Ash.Expr.expr(custom_tsvector)
+    ]
+  }
+  def ash_pagify_options, do: @ash_pagify_options
 
   ets do
     private? true

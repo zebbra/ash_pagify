@@ -16,6 +16,7 @@ defmodule AshPagify.ValidationTest do
   alias AshPagify.Factory.Comment
   alias AshPagify.Factory.Post
   alias AshPagify.Factory.User
+  alias AshPagify.Misc
   alias AshPagify.Validation
 
   doctest AshPagify.Validation, import: true
@@ -220,14 +221,14 @@ defmodule AshPagify.ValidationTest do
     end
 
     test "passes with non-empty map scopes" do
-      ash_pagify_scopes = AshPagify.get_option(:ash_pagify_scopes, for: Post)
+      scopes = Misc.get_option(:scopes, for: Post)
 
       assert %{scopes: %{role: :admin}} ==
-               Validation.validate_scopes(%{scopes: %{role: :admin}}, ash_pagify_scopes)
+               Validation.validate_scopes(%{scopes: %{role: :admin}}, scopes)
     end
 
     test "replaces invalid scope name and adds errors" do
-      ash_pagify_scopes = AshPagify.get_option(:ash_pagify_scopes, for: Post)
+      scopes = Misc.get_option(:scopes, for: Post)
 
       assert %{
                scopes: nil,
@@ -237,14 +238,14 @@ defmodule AshPagify.ValidationTest do
              } =
                Validation.validate_scopes(
                  %{scopes: %{role: :invalid}},
-                 ash_pagify_scopes,
+                 scopes,
                  nil,
                  replace_invalid_params?: true
                )
     end
 
     test "does not replace invalid scope name and adds errors" do
-      ash_pagify_scopes = AshPagify.get_option(:ash_pagify_scopes, for: Post)
+      scopes = Misc.get_option(:scopes, for: Post)
 
       assert %{
                scopes: %{role: :invalid},
@@ -252,11 +253,11 @@ defmodule AshPagify.ValidationTest do
                  scopes: [%NoSuchScope{group: :role, name: :invalid}]
                ]
              } =
-               Validation.validate_scopes(%{scopes: %{role: :invalid}}, ash_pagify_scopes)
+               Validation.validate_scopes(%{scopes: %{role: :invalid}}, scopes)
     end
 
     test "replaces invalid scope group and adds errors" do
-      ash_pagify_scopes = AshPagify.get_option(:ash_pagify_scopes, for: Post)
+      scopes = Misc.get_option(:scopes, for: Post)
 
       assert %{
                scopes: nil,
@@ -264,13 +265,11 @@ defmodule AshPagify.ValidationTest do
                  scopes: [%NoSuchScope{group: :invalid, name: :admin}]
                ]
              } =
-               Validation.validate_scopes(%{scopes: %{invalid: :admin}}, ash_pagify_scopes, nil,
-                 replace_invalid_params?: true
-               )
+               Validation.validate_scopes(%{scopes: %{invalid: :admin}}, scopes, nil, replace_invalid_params?: true)
     end
 
     test "does not replace invalid scope group and adds errors" do
-      ash_pagify_scopes = AshPagify.get_option(:ash_pagify_scopes, for: Post)
+      scopes = Misc.get_option(:scopes, for: Post)
 
       assert %{
                scopes: %{invalid: :admin},
@@ -278,11 +277,11 @@ defmodule AshPagify.ValidationTest do
                  scopes: [%NoSuchScope{group: :invalid, name: :admin}]
                ]
              } =
-               Validation.validate_scopes(%{scopes: %{invalid: :admin}}, ash_pagify_scopes)
+               Validation.validate_scopes(%{scopes: %{invalid: :admin}}, scopes)
     end
 
     test "replaces invalid scopes parameter" do
-      ash_pagify_scopes = AshPagify.get_option(:ash_pagify_scopes, for: Post)
+      scopes = Misc.get_option(:scopes, for: Post)
 
       assert %{
                scopes: nil,
@@ -290,11 +289,11 @@ defmodule AshPagify.ValidationTest do
                  scopes: [%InvalidScopesParameter{scopes: 1}]
                ]
              } =
-               Validation.validate_scopes(%{scopes: 1}, ash_pagify_scopes, nil, replace_invalid_params?: true)
+               Validation.validate_scopes(%{scopes: 1}, scopes, nil, replace_invalid_params?: true)
     end
 
     test "does not replace invalid scopes parameter" do
-      ash_pagify_scopes = AshPagify.get_option(:ash_pagify_scopes, for: Post)
+      scopes = Misc.get_option(:scopes, for: Post)
 
       assert %{
                scopes: 1,
@@ -302,11 +301,11 @@ defmodule AshPagify.ValidationTest do
                  scopes: [%InvalidScopesParameter{scopes: 1}]
                ]
              } =
-               Validation.validate_scopes(%{scopes: 1}, ash_pagify_scopes)
+               Validation.validate_scopes(%{scopes: 1}, scopes)
     end
 
     test "replaces invalid scope group and keeps valid scopes" do
-      ash_pagify_scopes = AshPagify.get_option(:ash_pagify_scopes, for: Post)
+      scopes = Misc.get_option(:scopes, for: Post)
 
       assert %{
                scopes: %{role: :admin},
@@ -316,14 +315,14 @@ defmodule AshPagify.ValidationTest do
              } =
                Validation.validate_scopes(
                  %{scopes: %{role: :admin, invalid: :admin}},
-                 ash_pagify_scopes,
+                 scopes,
                  nil,
                  replace_invalid_params?: true
                )
     end
 
     test "replaces invalid scope group and keeps valid scopes and loads default scopes" do
-      ash_pagify_scopes = AshPagify.get_option(:ash_pagify_scopes, for: Post)
+      scopes = Misc.get_option(:scopes, for: Post)
 
       assert %{
                scopes: %{role: :user},
@@ -333,17 +332,17 @@ defmodule AshPagify.ValidationTest do
              } =
                Validation.validate_scopes(
                  %{scopes: %{invalid: :admin}},
-                 ash_pagify_scopes,
+                 scopes,
                  %{role: :user},
                  replace_invalid_params?: true
                )
     end
 
     test "loads default scopes" do
-      ash_pagify_scopes = AshPagify.get_option(:ash_pagify_scopes, for: Post)
+      scopes = Misc.get_option(:scopes, for: Post)
 
       assert %{scopes: %{role: :user}} ==
-               Validation.validate_scopes(%{}, ash_pagify_scopes, %{role: :user})
+               Validation.validate_scopes(%{}, scopes, %{role: :user})
     end
   end
 

@@ -521,8 +521,8 @@ defmodule AshPagifyTest do
       ash_pagify = %AshPagify{limit: 1, offset: 0, order_by: :name}
 
       opts =
-        AshPagify.Misc.maybe_put_compiled_ash_pagify_scopes(Post,
-          ash_pagify_scopes: %{
+        AshPagify.Misc.maybe_put_compiled_scopes(Post,
+          scopes: %{
             role: [
               %{name: :user, filter: %{author: "Doe"}, default?: true}
             ]
@@ -778,107 +778,6 @@ defmodule AshPagifyTest do
           AshPagify.push_order(ash_pagify, :name, directions: directions)
         end
       end
-    end
-  end
-
-  describe "get_option/3" do
-    test "returns value from option list" do
-      # sanity check
-      default_limit = Post.default_limit()
-      assert default_limit && default_limit != 40
-
-      assert AshPagify.get_option(
-               :default_limit,
-               [default_limit: 40, for: Post],
-               1
-             ) == 40
-    end
-
-    test "falls back to resource option" do
-      # sanity check
-      assert default_limit = Post.default_limit()
-
-      assert AshPagify.get_option(
-               :default_limit,
-               [for: Post],
-               1
-             ) == default_limit
-    end
-
-    test "falls back to default AshPagify value" do
-      assert AshPagify.get_option(:default_limit, []) == 25
-    end
-
-    test "falls back to default value passed to function" do
-      assert AshPagify.get_option(:some_option, [], 2) == 2
-    end
-
-    test "falls back to nil" do
-      assert AshPagify.get_option(:some_option, []) == nil
-    end
-
-    test "merges ash_pagify_scopes" do
-      # sanity check
-      assert AshPagify.get_option(:ash_pagify_scopes, [for: Post], %{}) ==
-               Post.ash_pagify_scopes()
-
-      # with default value
-      assert AshPagify.get_option(:ash_pagify_scopes, [for: Post], %{
-               role: [
-                 %{name: :admin, filter: %{author: "John"}, default?: true}
-               ]
-             }) == %{
-               role: [
-                 %{name: :admin, filter: %{author: "John"}, default?: true},
-                 %{name: :user, filter: %{author: "Doe"}}
-               ],
-               status: [
-                 %{name: :all, filter: nil, default?: true},
-                 %{name: :active, filter: %{age: %{lt: 10}}},
-                 %{name: :inactive, filter: %{age: %{gte: 10}}}
-               ]
-             }
-
-      # with opts scopes
-      opts = [
-        ash_pagify_scopes: %{
-          other: [
-            %{name: :other, filter: %{name: "other"}}
-          ],
-          role: [
-            %{name: :user, filter: %{name: "changed"}},
-            %{name: :other, filter: %{name: "other"}}
-          ],
-          status: [
-            %{name: :inactive, filter: %{age: %{gte: 10}}},
-            %{name: :all, filter: nil, default?: true},
-            %{name: :active, filter: %{age: %{lt: 10}}}
-          ]
-        },
-        for: Post
-      ]
-
-      default = %{
-        role: [
-          %{name: :admin, filter: %{author: "John"}, default?: true}
-        ]
-      }
-
-      assert AshPagify.get_option(:ash_pagify_scopes, opts, default) == %{
-               role: [
-                 %{name: :admin, filter: %{author: "John"}, default?: true},
-                 %{name: :user, filter: %{name: "changed"}},
-                 %{name: :other, filter: %{name: "other"}}
-               ],
-               other: [
-                 %{name: :other, filter: %{name: "other"}}
-               ],
-               status: [
-                 %{name: :inactive, filter: %{age: %{gte: 10}}},
-                 %{name: :all, filter: nil, default?: true},
-                 %{name: :active, filter: %{age: %{lt: 10}}}
-               ]
-             }
     end
   end
 

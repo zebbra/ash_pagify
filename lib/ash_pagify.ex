@@ -5,7 +5,6 @@ defmodule AshPagify do
              |> Enum.fetch!(1)
 
   alias Ash.Page.Offset
-  alias Ash.Resource.Info
   alias AshPagify.Error.Query.InvalidDirectionsError
   alias AshPagify.FilterForm
   alias AshPagify.Meta
@@ -19,19 +18,21 @@ defmodule AshPagify do
   @default_opts [
     default_limit: 25,
     max_limit: 100,
-    replace_invalid_params?: false,
-    ash_pagify_scopes: %{},
-    reset_on_filter?: true
+    scopes: %{},
+    full_text_search: [],
+    reset_on_filter?: true,
+    replace_invalid_params?: false
   ]
+  def default_opts, do: @default_opts
   @default_opts_keys Enum.map(@default_opts, fn {k, _} -> k end)
+  def default_opts_keys, do: @default_opts_keys
 
   @internal_opts [
-    :__compiled_ash_pagify_scopes,
-    :__compiled_ash_pagify_default_scopes,
+    :__compiled_scopes,
+    :__compiled_default_scopes,
     :for,
     :full_text_search
   ]
-  @resource_options [:default_limit, :ash_pagify_scopes]
 
   defstruct limit: nil,
             offset: nil,
@@ -55,15 +56,15 @@ defmodule AshPagify do
     Can be overridden by the resource's `default_limit` function.
   - `:max_limit` - The maximum number of records that can be returned. Defaults
     to 100.
+  - `:scopes` - A map of predefined filters to apply to the query. Each map
+    entry itself is a group (list) of `t:AshPagify.scope/0` entries.
+  - `:full_text_search` - A list of options for full-text search. See
+    `t:AshPagify.Tsearch.tsearch_option/0`.
+  - `:reset_on_filter?` - If set to `true`, the offset will be reset to 0 when
+    a filter is applied. Defaults to `true`.
   - `:replace_invalid_params?` - If set to `true`, invalid parameters will be
     replaced with the default value. If set to `false`, invalid parameters
     will result in an error. Defaults to `false`.
-  - `:ash_pagify_scopes` - A map of predefined filters to apply to the query. Each map
-    entry itself is a group (list) of `t:AshPagify.scope/0` entries.
-  - `:reset_on_filter?` - If set to `true`, the offset will be reset to 0 when
-    a filter is applied. Defaults to `true`.
-  - `:full_text_search` - A list of options for full-text search. See
-    `t:AshPagify.Tsearch.tsearch_option/0`.
 
   ## Look-up order
 
@@ -78,15 +79,15 @@ defmodule AshPagify do
   @type option ::
           {default_limit :: non_neg_integer()}
           | {max_limit :: non_neg_integer()}
-          | {replace_invalid_params? :: boolean()}
-          | {ash_pagify_scopes :: map()}
-          | {reset_on_filter? :: boolean()}
+          | {scopes :: map()}
           | {full_text_search :: list(AshPagify.Tsearch.tsearch_option())}
+          | {reset_on_filter? :: boolean()}
+          | {replace_invalid_params? :: boolean()}
 
   @typedoc """
   A scope is a predefined filter that is merged with the user-provided filters.
 
-  Scope definitions live in the resource provided `ash_pagify_scopes` function or in
+  Scope definitions live in the resource provided `ash_pagify_options scopes` function or in
   the provided `t:AshPagify.option/0`. Contrary to user-provided filters, scope filters
   are not parsed as user input and are not validated as such. However, they are
   validated in the `AshPagify.validate_and_run/4` context. User-provided parameters are
@@ -476,7 +477,7 @@ defmodule AshPagify do
   def validate_and_run(query_or_resource, map_or_ash_pagify, opts \\ [], args \\ nil) do
     opts =
       query_or_resource
-      |> Misc.maybe_put_compiled_ash_pagify_scopes(opts)
+      |> Misc.maybe_put_compiled_scopes(opts)
       |> Keyword.put_new(:for, get_resource(query_or_resource))
 
     with {:ok, ash_pagify} <- validate(query_or_resource, map_or_ash_pagify, opts) do
@@ -497,7 +498,7 @@ defmodule AshPagify do
   def validate_and_run!(query_or_resource, map_or_ash_pagify, opts \\ [], args \\ nil) do
     opts =
       query_or_resource
-      |> Misc.maybe_put_compiled_ash_pagify_scopes(opts)
+      |> Misc.maybe_put_compiled_scopes(opts)
       |> Keyword.put_new(:for, get_resource(query_or_resource))
 
     ash_pagify = validate!(query_or_resource, map_or_ash_pagify, opts)
@@ -609,8 +610,8 @@ defmodule AshPagify do
   end
 
   defp get_default_scopes(resource, opts) do
-    opts = Misc.maybe_put_compiled_ash_pagify_scopes(resource, opts)
-    Keyword.get(opts, :__compiled_ash_pagify_default_scopes)
+    opts = Misc.maybe_put_compiled_scopes(resource, opts)
+    Keyword.get(opts, :__compiled_default_scopes)
   end
 
   @doc """
@@ -769,8 +770,8 @@ defmodule AshPagify do
   def scope(%Ash.Query{} = q, %AshPagify{scopes: nil}, _), do: q
 
   def scope(%Ash.Query{resource: resource} = query, %AshPagify{scopes: scopes}, opts) when is_map(scopes) do
-    opts = Misc.maybe_put_compiled_ash_pagify_scopes(resource, opts)
-    compiled_scopes = Keyword.get(opts, :__compiled_ash_pagify_scopes)
+    opts = Misc.maybe_put_compiled_scopes(resource, opts)
+    compiled_scopes = Keyword.get(opts, :__compiled_scopes)
 
     Enum.reduce(scopes, query, fn {group, name}, acc ->
       apply_scope(acc, compiled_scopes, group, name)
@@ -1017,11 +1018,11 @@ defmodule AshPagify do
   defp put_default_limit(q, ash_pagify)
 
   defp put_default_limit(%Ash.Query{resource: r}, %AshPagify{limit: nil} = ash_pagify) when is_atom(r) and r != nil do
-    %{ash_pagify | limit: get_option(:default_limit, for: r)}
+    %{ash_pagify | limit: Misc.get_option(:default_limit, for: r)}
   end
 
   defp put_default_limit(_, %AshPagify{limit: nil} = ash_pagify) do
-    %{ash_pagify | limit: get_option(:default_limit)}
+    %{ash_pagify | limit: Misc.get_option(:default_limit)}
   end
 
   defp put_default_limit(_, ash_pagify), do: ash_pagify
@@ -1067,7 +1068,7 @@ defmodule AshPagify do
   def page(%AshPagify{limit: limit, offset: offset}, count: count)
       when is_nil(limit) and (is_integer(offset) and offset >= 0) do
     []
-    |> Keyword.put(:limit, get_option(:default_limit))
+    |> Keyword.put(:limit, Misc.get_option(:default_limit))
     |> Keyword.put(:offset, offset)
     |> Keyword.put(:count, count)
   end
@@ -1089,7 +1090,7 @@ defmodule AshPagify do
 
   def page(%AshPagify{limit: limit, offset: offset}, _) when is_nil(limit) and (is_integer(offset) and offset >= 0) do
     []
-    |> Keyword.put(:limit, get_option(:default_limit))
+    |> Keyword.put(:limit, Misc.get_option(:default_limit))
     |> Keyword.put(:offset, offset)
     |> Keyword.put(:count, true)
   end
@@ -1242,10 +1243,10 @@ defmodule AshPagify do
   def set_limit(ash_pagify, limit, opts \\ [])
 
   def set_limit(%AshPagify{} = ash_pagify, limit, opts) when is_integer(limit) and limit >= 1 do
-    if limit <= get_option(:max_limit, opts) do
+    if limit <= Misc.get_option(:max_limit, opts) do
       %{ash_pagify | limit: limit}
     else
-      %{ash_pagify | limit: get_option(:max_limit, opts)}
+      %{ash_pagify | limit: Misc.get_option(:max_limit, opts)}
     end
   end
 
@@ -1254,7 +1255,7 @@ defmodule AshPagify do
   end
 
   def set_limit(%AshPagify{} = ash_pagify, _, opts) do
-    %{ash_pagify | limit: get_option(:default_limit, opts)}
+    %{ash_pagify | limit: Misc.get_option(:default_limit, opts)}
   end
 
   @doc """
@@ -1383,7 +1384,7 @@ defmodule AshPagify do
   def set_search(%AshPagify{} = ash_pagify, search, opts) do
     ash_pagify = %{ash_pagify | search: search}
 
-    reset_on_filter = get_option(:reset_on_filter?, opts, true)
+    reset_on_filter = Misc.get_option(:reset_on_filter?, opts, true)
 
     if reset_on_filter do
       %{ash_pagify | offset: nil}
@@ -1428,7 +1429,7 @@ defmodule AshPagify do
     scopes = ash_pagify.scopes || %{}
     ash_pagify = %{ash_pagify | scopes: Map.merge(scopes, scope)}
 
-    reset_on_filter = get_option(:reset_on_filter?, opts, true)
+    reset_on_filter = Misc.get_option(:reset_on_filter?, opts, true)
 
     if reset_on_filter do
       %{ash_pagify | offset: nil}
@@ -1527,7 +1528,7 @@ defmodule AshPagify do
   end
 
   defp maybe_reset_offset(%AshPagify{} = ash_pagify, opts) do
-    reset_on_filter = get_option(:reset_on_filter?, opts, true)
+    reset_on_filter = Misc.get_option(:reset_on_filter?, opts, true)
 
     if reset_on_filter do
       %{ash_pagify | offset: nil}
@@ -1717,8 +1718,8 @@ defmodule AshPagify do
   defp load_scopes_filters(_resource, nil, _opts), do: %{}
 
   defp load_scopes_filters(resource, scopes, opts) do
-    opts = Misc.maybe_put_compiled_ash_pagify_scopes(resource, opts)
-    compiled_scopes = Keyword.get(opts, :__compiled_ash_pagify_scopes)
+    opts = Misc.maybe_put_compiled_scopes(resource, opts)
+    compiled_scopes = Keyword.get(opts, :__compiled_scopes)
 
     Enum.reduce(scopes, %{}, fn {group, name}, acc ->
       get_scope_filter(acc, compiled_scopes, group, name)
@@ -2237,127 +2238,4 @@ defmodule AshPagify do
   defp reverse_direction(:asc_nils_first), do: :desc_nils_last
   defp reverse_direction(:desc), do: :asc
   defp reverse_direction(:desc_nils_last), do: :asc_nils_first
-
-  @doc """
-  Returns the option with the given key.
-
-  The look-up order is:
-
-  1. the keyword list passed as the second argument
-  2. the Ash.Resource resource, if the passed list includes the `:for` option
-  3. the application environment
-  4. the AshPagify default value if defined
-  5. the default passed as the last argument
-
-  For the `:ash_pagify_scopes` option, the function will deep merge the options
-  in reverse order (keyword overrides resource, resource overrides global, etc.)
-
-  ## Examples for `:ash_pagify_scopes`
-
-      iex> alias AshPagify.Factory.Post
-      iex> opts = [
-      ...>   ash_pagify_scopes: %{
-      ...>     role: [
-      ...>       %{name: :user, filter: %{name: "changed"}},
-      ...>       %{name: :other, filter: %{name: "other"}}
-      ...>     ],
-      ...>     status: [
-      ...>       %{name: :all, filter: nil, default?: true},
-      ...>       %{name: :active, filter: %{age: %{lt: 10}}},
-      ...>       %{name: :inactive, filter: %{age: %{gte: 10}}}
-      ...>     ]
-      ...>   },
-      ...>   for: Post
-      ...> ]
-      iex> get_option(:ash_pagify_scopes, opts, %{
-      ...>   role: [
-      ...>     %{name: :default, filter: %{author: "Default"}}
-      ...>   ]
-      ...> })
-      %{
-        role: [
-          %{name: :admin, filter: %{author: "John"}},
-          %{name: :user, filter: %{name: "changed"}},
-          %{name: :other, filter: %{name: "other"}},
-          %{name: :default, filter: %{author: "Default"}}
-        ],
-        status: [
-          %{name: :inactive, filter: %{age: %{gte: 10}}},
-          %{name: :all, filter: nil, default?: true},
-          %{name: :active, filter: %{age: %{lt: 10}}}
-        ]
-      }
-  """
-  @spec get_option(atom(), Keyword.t(), any()) :: any()
-  def get_option(key, opts \\ [], default \\ nil)
-
-  def get_option(:ash_pagify_scopes, opts, default) do
-    opts_scopes = Keyword.get(opts, :ash_pagify_scopes, %{})
-    resource_scopes = resource_option(opts[:for], :ash_pagify_scopes) || %{}
-    global_scopes = global_option(:ash_pagify_scopes) || %{}
-    default_scopes = Keyword.get(@default_opts, :ash_pagify_scopes, %{})
-    default = default || %{}
-
-    default
-    |> merge_scopes(default_scopes)
-    |> merge_scopes(global_scopes)
-    |> merge_scopes(resource_scopes)
-    |> merge_scopes(opts_scopes)
-  end
-
-  def get_option(key, opts, default) do
-    with nil <- opts[key],
-         nil <- resource_option(opts[:for], key),
-         nil <- global_option(key) do
-      Keyword.get(@default_opts, key, default)
-    end
-  end
-
-  defp merge_scopes(nil, default), do: default
-
-  defp merge_scopes(opts, default) do
-    Map.merge(default, opts, fn _key, default_val, opts_val ->
-      merge_scope_lists(default_val, opts_val)
-    end)
-  end
-
-  defp merge_scope_lists(default_list, opts_list) do
-    default_map = Map.new(default_list, &{&1[:name], &1})
-    opts_map = Map.new(opts_list, &{&1[:name], &1})
-
-    merged_map =
-      Map.merge(default_map, opts_map, fn _key, default_item, opts_item ->
-        Map.merge(opts_item, default_item)
-      end)
-
-    merged_map |> Map.values() |> Enum.reverse()
-  end
-
-  defp resource_option(resource, key) when is_atom(resource) and resource != nil and key in @resource_options do
-    if Keyword.has_key?(resource.__info__(:functions), key) do
-      apply(resource, key, [])
-    end
-  end
-
-  defp resource_option(resource, key) when is_atom(resource) and resource != nil and key == :default_order do
-    resource |> Info.preparations() |> resource_preparation_sort()
-  end
-
-  defp resource_option(_, _), do: nil
-
-  defp resource_preparation_sort(preparations, default \\ nil)
-  defp resource_preparation_sort([], default), do: default
-
-  defp resource_preparation_sort([%Ash.Resource.Preparation{preparation: {_, [options: [sort: sort]]}} | _rest], _default)
-       when is_list(sort) do
-    sort
-  end
-
-  defp resource_preparation_sort([_ | rest], default) do
-    resource_preparation_sort(rest, default)
-  end
-
-  defp global_option(key) when is_atom(key) do
-    Application.get_env(:ash_pagify, :key, nil)
-  end
 end

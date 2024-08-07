@@ -34,7 +34,7 @@ defmodule AshPagify.Components.Table do
 
   def merge_opts(opts) do
     default_opts()
-    |> Misc.list_merge(Misc.get_global_opts(:table))
+    |> Misc.list_merge(Misc.global_option(:table) || [])
     |> Misc.list_merge(opts)
   end
 

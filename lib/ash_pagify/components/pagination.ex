@@ -40,7 +40,7 @@ defmodule AshPagify.Components.Pagination do
 
   def merge_opts(opts) do
     default_opts()
-    |> Misc.list_merge(Misc.get_global_opts(:pagination))
+    |> Misc.list_merge(Misc.global_option(:pagination) || [])
     |> Misc.list_merge(opts)
   end
 
