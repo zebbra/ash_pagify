@@ -103,7 +103,7 @@ Then simply add `ash_pagify` to your list of dependencies in `mix.exs` and run
 ```elixir
 def deps do
   [
-    {:ash_pagify, "~> 0.1.2"}
+    {:ash_pagify, "~> 1.0.0"}
   ]
 end
 ```
@@ -138,35 +138,30 @@ See `t:AshPagify.option/0` for a description of all available options.
 
 ## Resource configuration
 
-You need to add the `pagination macro` call to the action of the resource that you
+All settings described in the global configuration can be overridden in the resource
+module. For this, you need to define the `@ash_pagify_options` module attribute and
+set the options you want to override.
+
+Also, you need to add the `pagination macro` call to the action of the resource that you
 want to be paginated. The macro call is used to set the default limit, offset and
 other options for the pagination.
-
-Furthermore, you can define scopes in the resource module. Scopes are predefined
-filters that can be applied to the query.
-
-We allow full-text search using the `tsvector` column in PostgreSQL. To enable full-text search,
-you need to either `use AshPagify.Tsearch` in your module or implement the `full_text_search`,
-`full_text_search_rank`, `tsquery`, and `tsvector` calculations as described in `AshPagify.Tsearch`
-(tsvector calculation  is always mandatory).
 
 ```elixir
 defmodule YourApp.Resource.Post
   # only required if you want to implement full-text search
   use AshPagify.Tsearch
-  require Ash.Query
+  require Ash.Expr
 
-  @default_limit 15
-  def default_limit, do: @default_limit
-
-  @ash_pagify_scopes %{
-    role: [
-      %{name: :all, filter: nil},
-      %{name: :admin, filter: %{author: "John"}},
-      %{name: :user, filter: %{author: "Doe"}}
+  @ash_pagify_options {
+    default_limit: 15,
+    scopes: [
+      role: [
+        %{name: :all, filter: nil},
+        %{name: :admin, filter: %{author: "John"}},
+        %{name: :user, filter: %{author: "Doe"}}
+      ]
     ]
   }
-  def ash_pagify_scopes, do: @ash_pagify_scopes
 
   actions do
     read :read do

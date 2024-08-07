@@ -5,6 +5,13 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v1.0.0](https://github.com/zebbra/ash_pagify/compare/v0.1.2...v1.0.0) (2024-08-07)
+### Breaking Changes:
+
+* Ash v3: follow ash v3 upgrade guide
+
+
+
 ## [v0.1.2](https://github.com/zebbra/ash_pagify/compare/v0.1.1...v0.1.2) (2024-08-05)
 
 
