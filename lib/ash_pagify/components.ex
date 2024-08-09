@@ -159,9 +159,11 @@ defmodule AshPagify.Components do
 
   alias AshPagify.Components.Pagination
   alias AshPagify.Components.Table
+  alias AshPagify.Error.Components.PathOrJSError
   alias AshPagify.Meta
   alias AshPagify.Misc
   alias Phoenix.LiveView.JS
+  alias Phoenix.LiveView.Rendered
   alias Plug.Conn.Query
 
   @typedoc """
@@ -309,7 +311,7 @@ defmodule AshPagify.Components do
     are always displayed. The `x` refers to the number of additional page links
     to show (default n=4).
   """
-  @spec pagination(map()) :: Phoenix.LiveView.Rendered.t()
+  @spec pagination(map()) :: Rendered.t()
 
   attr :meta, Meta,
     required: true,
@@ -391,7 +393,7 @@ defmodule AshPagify.Components do
     """
 
   def pagination(%{path: nil, on_paginate: nil}) do
-    raise AshPagify.Error.Components.PathOrJSError, component: :pagination
+    raise PathOrJSError, component: :pagination
   end
 
   def pagination(%{meta: meta, opts: opts, path: path} = assigns) do
@@ -558,7 +560,7 @@ defmodule AshPagify.Components do
   </AshPagify.Components.table>
   ```
   """
-  @spec table(map) :: Phoenix.LiveView.Rendered.t()
+  @spec table(map) :: Rendered.t()
 
   attr :id, :string,
     doc: """
@@ -821,7 +823,7 @@ defmodule AshPagify.Components do
     """
 
   def table(%{meta: %Meta{}, path: nil, on_sort: nil}) do
-    raise AshPagify.Error.Components.PathOrJSError, component: :table
+    raise PathOrJSError, component: :table
   end
 
   def table(%{meta: nil} = assigns) do
@@ -1218,7 +1220,7 @@ defmodule AshPagify.Components do
       |> Query.decode()
       |> Map.merge(Misc.remove_nil_values(ash_pagify_params))
 
-    query = if query != %{}, do: Query.encode(query)
+    query = unless query == %{}, do: Query.encode(query)
 
     uri
     |> Map.put(:query, query)

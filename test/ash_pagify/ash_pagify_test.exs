@@ -4,6 +4,11 @@ defmodule AshPagifyTest do
 
   import Assertions
 
+  alias Ash.Error.Query.InvalidLimit
+  alias Ash.Error.Query.NoSuchField
+  alias Ash.Page.Offset
+  alias AshPagify.Error.Query.InvalidParamsError
+  alias AshPagify.Error.Query.SearchNotImplemented
   alias AshPagify.Factory.Comment
   alias AshPagify.Factory.Post
   alias AshPagify.Factory.User
@@ -571,8 +576,8 @@ defmodule AshPagifyTest do
       assert inspect(meta.params) ==
                ~s"%{offset: 0, filters: #Ash.Filter<name == \"Post 1\">, limit: 15, scopes: %{status: :all}}"
 
-      assert [%Ash.Error.Query.InvalidLimit{limit: -1}] = Keyword.get(meta.errors, :limit)
-      assert [%Ash.Error.Query.NoSuchField{field: :other}] = Keyword.get(meta.errors, :filters)
+      assert [%InvalidLimit{limit: -1}] = Keyword.get(meta.errors, :limit)
+      assert [%NoSuchField{field: :other}] = Keyword.get(meta.errors, :filters)
     end
 
     test "returns error and original params if ash_pagify is invalid" do
@@ -590,8 +595,8 @@ defmodule AshPagifyTest do
                scopes: %{status: :all}
              } == meta.params
 
-      assert [%Ash.Error.Query.InvalidLimit{limit: -1}] = Keyword.get(meta.errors, :limit)
-      assert [%Ash.Error.Query.NoSuchField{field: :other}] = Keyword.get(meta.errors, :filters)
+      assert [%InvalidLimit{limit: -1}] = Keyword.get(meta.errors, :limit)
+      assert [%NoSuchField{field: :other}] = Keyword.get(meta.errors, :filters)
     end
 
     test "returns data and meta data" do
@@ -627,7 +632,7 @@ defmodule AshPagifyTest do
 
   describe "validate_and_run!/4" do
     test "raises if ash_pagify is invalid" do
-      assert_raise AshPagify.Error.Query.InvalidParamsError, fn ->
+      assert_raise InvalidParamsError, fn ->
         AshPagify.validate_and_run!(Post, %AshPagify{
           limit: -1,
           filters: %{name: "Post 1", other: "John"}
@@ -679,8 +684,8 @@ defmodule AshPagifyTest do
       assert offset == 0
       assert inspect(filters) == ~s"#Ash.Filter<name == \"Post 1\">"
 
-      assert [%Ash.Error.Query.InvalidLimit{limit: -1}] = Keyword.get(meta.errors, :limit)
-      assert [%Ash.Error.Query.NoSuchField{field: :other}] = Keyword.get(meta.errors, :filters)
+      assert [%InvalidLimit{limit: -1}] = Keyword.get(meta.errors, :limit)
+      assert [%NoSuchField{field: :other}] = Keyword.get(meta.errors, :filters)
     end
 
     test "returns error and original params if parameters are invalid" do
@@ -699,8 +704,8 @@ defmodule AshPagifyTest do
                scopes: %{status: :all}
              } == meta.params
 
-      assert [%Ash.Error.Query.InvalidLimit{limit: -1}] = Keyword.get(meta.errors, :limit)
-      assert [%Ash.Error.Query.NoSuchField{field: :other}] = Keyword.get(meta.errors, :filters)
+      assert [%InvalidLimit{limit: -1}] = Keyword.get(meta.errors, :limit)
+      assert [%NoSuchField{field: :other}] = Keyword.get(meta.errors, :filters)
     end
   end
 
@@ -721,14 +726,14 @@ defmodule AshPagifyTest do
 
     test "raises if params are invalid" do
       error =
-        assert_raise AshPagify.Error.Query.InvalidParamsError, fn ->
+        assert_raise InvalidParamsError, fn ->
           AshPagify.validate!(Post, %{limit: -1, filters: %{name: "Post 1", other: "John"}})
         end
 
       assert %{limit: -1, filters: %{name: "Post 1", other: "John"}} == error.params
 
-      assert [%Ash.Error.Query.InvalidLimit{limit: -1}] = Keyword.get(error.errors, :limit)
-      assert [%Ash.Error.Query.NoSuchField{field: :other}] = Keyword.get(error.errors, :filters)
+      assert [%InvalidLimit{limit: -1}] = Keyword.get(error.errors, :limit)
+      assert [%NoSuchField{field: :other}] = Keyword.get(error.errors, :filters)
     end
   end
 
@@ -1067,7 +1072,7 @@ defmodule AshPagifyTest do
                search: "User 1",
                errors: [
                  search: [
-                   %AshPagify.Error.Query.SearchNotImplemented{resource: User}
+                   %SearchNotImplemented{resource: User}
                  ]
                ]
              } =
@@ -1081,7 +1086,7 @@ defmodule AshPagifyTest do
     end
 
     test "raises and does not store in case of invalid full-text search" do
-      assert_raise AshPagify.Error.Query.SearchNotImplemented, fn ->
+      assert_raise SearchNotImplemented, fn ->
         AshPagify.query_to_filters_map(
           User,
           %AshPagify{
@@ -1173,7 +1178,7 @@ defmodule AshPagifyTest do
     end
 
     test "does not include full_text_search if none is configured and raises" do
-      assert_raise AshPagify.Error.Query.SearchNotImplemented, fn ->
+      assert_raise SearchNotImplemented, fn ->
         AshPagify.query_for_filters_map(
           User,
           %{"and" => [%{"name" => "foo"}], "__full_text_search" => %{"search" => "bar"}}
@@ -1222,25 +1227,25 @@ defmodule AshPagifyTest do
   end
 
   defp assert_post_names(ash_pagify, names, opts \\ []) do
-    %Ash.Page.Offset{results: posts} = AshPagify.all(Post, ash_pagify, opts)
+    %Offset{results: posts} = AshPagify.all(Post, ash_pagify, opts)
 
     assert Enum.map(posts, & &1.name) == names
   end
 
   defp assert_page_opts(ash_pagify, expected, opts) do
-    %Ash.Page.Offset{rerun: {%Ash.Query{page: page}, _}} = AshPagify.all(Post, ash_pagify, opts)
+    %Offset{rerun: {%Ash.Query{page: page}, _}} = AshPagify.all(Post, ash_pagify, opts)
 
     assert_lists_equal(expected, page)
   end
 
   defp assert_comment_names(ash_pagify, names, opts \\ []) do
-    %Ash.Page.Offset{results: comments} = AshPagify.all(Comment, ash_pagify, opts)
+    %Offset{results: comments} = AshPagify.all(Comment, ash_pagify, opts)
 
     assert Enum.map(comments, & &1.body) == names
   end
 
   defp assert_comment_page_opts(ash_pagify, expected, opts) do
-    %Ash.Page.Offset{rerun: {%Ash.Query{page: page}, _}} =
+    %Offset{rerun: {%Ash.Query{page: page}, _}} =
       AshPagify.all(Comment, ash_pagify, opts)
 
     assert_lists_equal(expected, page)

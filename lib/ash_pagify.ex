@@ -4,7 +4,9 @@ defmodule AshPagify do
              |> String.split("<!-- MDOC -->")
              |> Enum.fetch!(1)
 
+  alias Ash.Page.Offset
   alias Ash.Resource.Info
+  alias AshPagify.Error.Query.InvalidDirectionsError
   alias AshPagify.FilterForm
   alias AshPagify.Meta
   alias AshPagify.Misc
@@ -292,7 +294,7 @@ defmodule AshPagify do
   query engine.
   """
   @spec all(Ash.Query.t() | Ash.Resource.t(), AshPagify.t(), Keyword.t(), any()) ::
-          Ash.Page.Offset.t()
+          Offset.t()
   def all(query_or_resource, ash_pagify, opts \\ [], args \\ nil)
 
   def all(%Ash.Query{resource: r} = q, %AshPagify{} = ash_pagify, opts, args) do
@@ -534,8 +536,8 @@ defmodule AshPagify do
   will automatically parse user provided input into the correct format for the
   query engine.
   """
-  @spec meta(Ash.Page.Offset.t(), AshPagify.t(), Keyword.t()) :: Meta.t()
-  def meta(%Ash.Page.Offset{} = page, %AshPagify{} = ash_pagify, opts \\ []) do
+  @spec meta(Offset.t(), AshPagify.t(), Keyword.t()) :: Meta.t()
+  def meta(%Offset{} = page, %AshPagify{} = ash_pagify, opts \\ []) do
     total_count = page.count
     page_size = page.limit
     total_pages = get_total_pages(total_count, page_size)
@@ -568,7 +570,7 @@ defmodule AshPagify do
     }
   end
 
-  defp get_resource(%Ash.Page.Offset{rerun: {original_query, _}}), do: original_query.resource
+  defp get_resource(%Offset{rerun: {original_query, _}}), do: original_query.resource
   defp get_resource(%Ash.Query{resource: r}), do: r
   defp get_resource(resource) when is_atom(resource) and resource != nil, do: resource
 
@@ -599,9 +601,9 @@ defmodule AshPagify do
   defp get_current_offset(nil), do: 0
   defp get_current_offset(offset), do: offset
 
-  defp get_current_page(%Ash.Page.Offset{offset: nil}, _), do: 1
+  defp get_current_page(%Offset{offset: nil}, _), do: 1
 
-  defp get_current_page(%Ash.Page.Offset{offset: offset, limit: limit}, total_pages) do
+  defp get_current_page(%Offset{offset: offset, limit: limit}, total_pages) do
     page = ceil(offset / limit) + 1
     min(page, total_pages)
   end
@@ -1727,10 +1729,10 @@ defmodule AshPagify do
     group_scopes = get_group_scopes(compiled_scopes, group)
     scope = find_scope(group_scopes, group, name)
 
-    if scope.filter != nil do
-      Map.merge(filters, scope.filter)
-    else
+    if scope.filter == nil do
       filters
+    else
+      Map.merge(filters, scope.filter)
     end
   end
 
@@ -2221,14 +2223,14 @@ defmodule AshPagify do
        do: asc
 
   defp new_order_direction(0, _current_direction, directions) do
-    raise AshPagify.Error.Query.InvalidDirectionsError, directions: directions
+    raise InvalidDirectionsError, directions: directions
   end
 
   defp new_order_direction(_, _, nil), do: :asc
   defp new_order_direction(_, _, {asc, _desc}) when is_direction(asc), do: asc
 
   defp new_order_direction(_, _, directions) do
-    raise AshPagify.Error.Query.InvalidDirectionsError, directions: directions
+    raise InvalidDirectionsError, directions: directions
   end
 
   defp reverse_direction(:asc), do: :desc

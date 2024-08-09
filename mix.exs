@@ -111,7 +111,7 @@ defmodule AshPagify.MixProject do
       {:dialyxir, "~> 1.4.3", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1.4", only: [:dev, :test], runtime: false},
       {:assertions, "~> 0.20.1", only: :test},
-      {:styler, "~> 0.11.9", only: [:dev, :test], runtime: false},
+      {:styler, "~> 1.0.0", only: [:dev, :test], runtime: false},
       {:junit_formatter, "~> 3.3", only: :test},
       {:ex_machina, "~> 2.8.0", only: :test},
       {:floki, ">= 0.36.0", only: :test},

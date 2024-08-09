@@ -4,6 +4,15 @@ defmodule AshPagify.ValidationTest do
 
   import AshPagify.Factory
 
+  alias Ash.Error.Query.InvalidFilterValue
+  alias Ash.Error.Query.InvalidLimit
+  alias Ash.Error.Query.InvalidOffset
+  alias Ash.Error.Query.NoSuchField
+  alias AshPagify.Error.Query.InvalidFilterFormParameter
+  alias AshPagify.Error.Query.InvalidOrderByParameter
+  alias AshPagify.Error.Query.InvalidScopesParameter
+  alias AshPagify.Error.Query.InvalidSearchParameter
+  alias AshPagify.Error.Query.NoSuchScope
   alias AshPagify.Factory.Comment
   alias AshPagify.Factory.Post
   alias AshPagify.Factory.User
@@ -43,13 +52,13 @@ defmodule AshPagify.ValidationTest do
       )
 
     assert [
-             offset: [%Ash.Error.Query.InvalidOffset{offset: -1}],
-             limit: [%Ash.Error.Query.InvalidLimit{limit: -1}],
-             order_by: [%AshPagify.Error.Query.InvalidOrderByParameter{order_by: 1}],
-             filters: [%Ash.Error.Query.InvalidFilterValue{value: 1}],
-             filter_form: [%AshPagify.Error.Query.InvalidFilterFormParameter{filter_form: -1}],
-             scopes: [%AshPagify.Error.Query.InvalidScopesParameter{scopes: -1}],
-             search: [%AshPagify.Error.Query.InvalidSearchParameter{search: -1}]
+             offset: [%InvalidOffset{offset: -1}],
+             limit: [%InvalidLimit{limit: -1}],
+             order_by: [%InvalidOrderByParameter{order_by: 1}],
+             filters: [%InvalidFilterValue{value: 1}],
+             filter_form: [%InvalidFilterFormParameter{filter_form: -1}],
+             scopes: [%InvalidScopesParameter{scopes: -1}],
+             search: [%InvalidSearchParameter{search: -1}]
            ] = errors
 
     assert %{
@@ -78,13 +87,13 @@ defmodule AshPagify.ValidationTest do
       Validation.validate_params(Post, params)
 
     assert [
-             offset: [%Ash.Error.Query.InvalidOffset{offset: -1}],
-             limit: [%Ash.Error.Query.InvalidLimit{limit: -1}],
-             order_by: [%AshPagify.Error.Query.InvalidOrderByParameter{order_by: 1}],
-             filters: [%Ash.Error.Query.InvalidFilterValue{value: 1}],
-             filter_form: [%AshPagify.Error.Query.InvalidFilterFormParameter{filter_form: -1}],
-             scopes: [%AshPagify.Error.Query.InvalidScopesParameter{scopes: -1}],
-             search: [%AshPagify.Error.Query.InvalidSearchParameter{search: -1}]
+             offset: [%InvalidOffset{offset: -1}],
+             limit: [%InvalidLimit{limit: -1}],
+             order_by: [%InvalidOrderByParameter{order_by: 1}],
+             filters: [%InvalidFilterValue{value: 1}],
+             filter_form: [%InvalidFilterFormParameter{filter_form: -1}],
+             scopes: [%InvalidScopesParameter{scopes: -1}],
+             search: [%InvalidSearchParameter{search: -1}]
            ] = errors
 
     assert %{
@@ -165,7 +174,7 @@ defmodule AshPagify.ValidationTest do
       assert %{
                search: nil,
                errors: [
-                 search: [%AshPagify.Error.Query.InvalidSearchParameter{search: 1}]
+                 search: [%InvalidSearchParameter{search: 1}]
                ]
              } =
                Validation.validate_search(%{search: 1}, for: Post, replace_invalid_params?: true)
@@ -175,7 +184,7 @@ defmodule AshPagify.ValidationTest do
       assert %{
                search: 1,
                errors: [
-                 search: [%AshPagify.Error.Query.InvalidSearchParameter{search: 1}]
+                 search: [%InvalidSearchParameter{search: 1}]
                ]
              } =
                Validation.validate_search(%{search: 1}, for: Post)
@@ -223,7 +232,7 @@ defmodule AshPagify.ValidationTest do
       assert %{
                scopes: nil,
                errors: [
-                 scopes: [%AshPagify.Error.Query.NoSuchScope{group: :role, name: :invalid}]
+                 scopes: [%NoSuchScope{group: :role, name: :invalid}]
                ]
              } =
                Validation.validate_scopes(
@@ -240,7 +249,7 @@ defmodule AshPagify.ValidationTest do
       assert %{
                scopes: %{role: :invalid},
                errors: [
-                 scopes: [%AshPagify.Error.Query.NoSuchScope{group: :role, name: :invalid}]
+                 scopes: [%NoSuchScope{group: :role, name: :invalid}]
                ]
              } =
                Validation.validate_scopes(%{scopes: %{role: :invalid}}, ash_pagify_scopes)
@@ -252,7 +261,7 @@ defmodule AshPagify.ValidationTest do
       assert %{
                scopes: nil,
                errors: [
-                 scopes: [%AshPagify.Error.Query.NoSuchScope{group: :invalid, name: :admin}]
+                 scopes: [%NoSuchScope{group: :invalid, name: :admin}]
                ]
              } =
                Validation.validate_scopes(%{scopes: %{invalid: :admin}}, ash_pagify_scopes, nil,
@@ -266,7 +275,7 @@ defmodule AshPagify.ValidationTest do
       assert %{
                scopes: %{invalid: :admin},
                errors: [
-                 scopes: [%AshPagify.Error.Query.NoSuchScope{group: :invalid, name: :admin}]
+                 scopes: [%NoSuchScope{group: :invalid, name: :admin}]
                ]
              } =
                Validation.validate_scopes(%{scopes: %{invalid: :admin}}, ash_pagify_scopes)
@@ -278,7 +287,7 @@ defmodule AshPagify.ValidationTest do
       assert %{
                scopes: nil,
                errors: [
-                 scopes: [%AshPagify.Error.Query.InvalidScopesParameter{scopes: 1}]
+                 scopes: [%InvalidScopesParameter{scopes: 1}]
                ]
              } =
                Validation.validate_scopes(%{scopes: 1}, ash_pagify_scopes, nil, replace_invalid_params?: true)
@@ -290,7 +299,7 @@ defmodule AshPagify.ValidationTest do
       assert %{
                scopes: 1,
                errors: [
-                 scopes: [%AshPagify.Error.Query.InvalidScopesParameter{scopes: 1}]
+                 scopes: [%InvalidScopesParameter{scopes: 1}]
                ]
              } =
                Validation.validate_scopes(%{scopes: 1}, ash_pagify_scopes)
@@ -302,7 +311,7 @@ defmodule AshPagify.ValidationTest do
       assert %{
                scopes: %{role: :admin},
                errors: [
-                 scopes: [%AshPagify.Error.Query.NoSuchScope{group: :invalid, name: :admin}]
+                 scopes: [%NoSuchScope{group: :invalid, name: :admin}]
                ]
              } =
                Validation.validate_scopes(
@@ -319,7 +328,7 @@ defmodule AshPagify.ValidationTest do
       assert %{
                scopes: %{role: :user},
                errors: [
-                 scopes: [%AshPagify.Error.Query.NoSuchScope{group: :invalid, name: :admin}]
+                 scopes: [%NoSuchScope{group: :invalid, name: :admin}]
                ]
              } =
                Validation.validate_scopes(
@@ -467,7 +476,7 @@ defmodule AshPagify.ValidationTest do
     end
 
     test "replaces simple invalid filters and adds errors" do
-      assert %{:filters => nil, :errors => [filters: [%Ash.Error.Query.InvalidFilterValue{}]]} =
+      assert %{:filters => nil, :errors => [filters: [%InvalidFilterValue{}]]} =
                Validation.validate_filters(%{filters: 1},
                  for: Post,
                  replace_invalid_params?: true
@@ -475,7 +484,7 @@ defmodule AshPagify.ValidationTest do
     end
 
     test "does not replace simple invalid filters and adds errors" do
-      assert %{:filters => 1, :errors => [filters: [%Ash.Error.Query.InvalidFilterValue{}]]} =
+      assert %{:filters => 1, :errors => [filters: [%InvalidFilterValue{}]]} =
                Validation.validate_filters(%{filters: 1}, for: Post)
     end
 
@@ -484,8 +493,8 @@ defmodule AshPagify.ValidationTest do
                :filters => nil,
                :errors => [
                  filters: [
-                   %Ash.Error.Query.NoSuchField{},
-                   %Ash.Error.Query.NoSuchField{}
+                   %NoSuchField{},
+                   %NoSuchField{}
                  ]
                ]
              } =
@@ -501,8 +510,8 @@ defmodule AshPagify.ValidationTest do
                :filters => %Ash.Filter{},
                :errors => [
                  filters: [
-                   %Ash.Error.Query.NoSuchField{},
-                   %Ash.Error.Query.NoSuchField{}
+                   %NoSuchField{},
+                   %NoSuchField{}
                  ]
                ]
              } =
@@ -557,7 +566,7 @@ defmodule AshPagify.ValidationTest do
                order_by: %{name: :asc},
                errors: [
                  order_by: [
-                   %AshPagify.Error.Query.InvalidOrderByParameter{}
+                   %InvalidOrderByParameter{}
                  ]
                ]
              } =
@@ -568,7 +577,7 @@ defmodule AshPagify.ValidationTest do
       assert %{
                order_by: nil,
                errors: [
-                 order_by: [%AshPagify.Error.Query.InvalidOrderByParameter{}]
+                 order_by: [%InvalidOrderByParameter{}]
                ]
              } =
                Validation.validate_order_by(%{order_by: %{name: :asc}},
@@ -587,7 +596,7 @@ defmodule AshPagify.ValidationTest do
                order_by: [name: :desc_nils_last],
                errors: [
                  order_by: [
-                   %Ash.Error.Query.NoSuchField{field: "non_existent", resource: Post}
+                   %NoSuchField{field: "non_existent", resource: Post}
                  ]
                ]
              } =
@@ -604,7 +613,7 @@ defmodule AshPagify.ValidationTest do
 
       assert %{
                limit: 0,
-               errors: [limit: [%Ash.Error.Query.InvalidLimit{limit: 0}]]
+               errors: [limit: [%InvalidLimit{limit: 0}]]
              } = Validation.validate_pagination(params, for: Post)
     end
 
@@ -613,7 +622,7 @@ defmodule AshPagify.ValidationTest do
 
       assert %{
                limit: "",
-               errors: [limit: [%Ash.Error.Query.InvalidLimit{limit: ""}]]
+               errors: [limit: [%InvalidLimit{limit: ""}]]
              } = Validation.validate_pagination(params, for: Post)
     end
 
@@ -622,7 +631,7 @@ defmodule AshPagify.ValidationTest do
 
       assert %{
                limit: "a",
-               errors: [limit: [%Ash.Error.Query.InvalidLimit{limit: "a"}]]
+               errors: [limit: [%InvalidLimit{limit: "a"}]]
              } = Validation.validate_pagination(params, for: Post)
     end
 
@@ -631,7 +640,7 @@ defmodule AshPagify.ValidationTest do
 
       assert %{
                limit: 15,
-               errors: [limit: [%Ash.Error.Query.InvalidLimit{limit: 0}]]
+               errors: [limit: [%InvalidLimit{limit: 0}]]
              } = Validation.validate_pagination(params, for: Post, replace_invalid_params?: true)
     end
 
@@ -640,7 +649,7 @@ defmodule AshPagify.ValidationTest do
 
       assert %{
                limit: 10,
-               errors: [limit: [%Ash.Error.Query.InvalidLimit{limit: 0}]]
+               errors: [limit: [%InvalidLimit{limit: 0}]]
              } =
                Validation.validate_pagination(params,
                  for: Comment,
@@ -654,7 +663,7 @@ defmodule AshPagify.ValidationTest do
 
       assert %{
                limit: 25,
-               errors: [limit: [%Ash.Error.Query.InvalidLimit{limit: 0}]]
+               errors: [limit: [%InvalidLimit{limit: 0}]]
              } =
                Validation.validate_pagination(params, for: Comment, replace_invalid_params?: true)
     end
@@ -664,7 +673,7 @@ defmodule AshPagify.ValidationTest do
 
       assert %{
                offset: -1,
-               errors: [offset: [%Ash.Error.Query.InvalidOffset{offset: -1}]]
+               errors: [offset: [%InvalidOffset{offset: -1}]]
              } = Validation.validate_pagination(params, for: Post)
     end
 
@@ -673,7 +682,7 @@ defmodule AshPagify.ValidationTest do
 
       assert %{
                offset: "",
-               errors: [offset: [%Ash.Error.Query.InvalidOffset{offset: ""}]]
+               errors: [offset: [%InvalidOffset{offset: ""}]]
              } = Validation.validate_pagination(params, for: Post)
     end
 
@@ -682,7 +691,7 @@ defmodule AshPagify.ValidationTest do
 
       assert %{
                offset: "a",
-               errors: [offset: [%Ash.Error.Query.InvalidOffset{offset: "a"}]]
+               errors: [offset: [%InvalidOffset{offset: "a"}]]
              } = Validation.validate_pagination(params, for: Post)
     end
 
@@ -691,7 +700,7 @@ defmodule AshPagify.ValidationTest do
 
       assert %{
                offset: 0,
-               errors: [offset: [%Ash.Error.Query.InvalidOffset{offset: -1}]]
+               errors: [offset: [%InvalidOffset{offset: -1}]]
              } = Validation.validate_pagination(params, for: Post, replace_invalid_params?: true)
     end
 
@@ -700,7 +709,7 @@ defmodule AshPagify.ValidationTest do
 
       assert %{
                limit: 101,
-               errors: [limit: [%Ash.Error.Query.InvalidLimit{limit: 101}]]
+               errors: [limit: [%InvalidLimit{limit: 101}]]
              } = Validation.validate_pagination(params, for: Post)
     end
 
@@ -709,7 +718,7 @@ defmodule AshPagify.ValidationTest do
 
       assert %{
                limit: 15,
-               errors: [limit: [%Ash.Error.Query.InvalidLimit{limit: 101}]]
+               errors: [limit: [%InvalidLimit{limit: 101}]]
              } = Validation.validate_pagination(params, for: Post, replace_invalid_params?: true)
     end
 
@@ -718,7 +727,7 @@ defmodule AshPagify.ValidationTest do
 
       assert %{
                limit: 10,
-               errors: [limit: [%Ash.Error.Query.InvalidLimit{limit: 101}]]
+               errors: [limit: [%InvalidLimit{limit: 101}]]
              } =
                Validation.validate_pagination(params,
                  for: Comment,
@@ -732,7 +741,7 @@ defmodule AshPagify.ValidationTest do
 
       assert %{
                limit: 25,
-               errors: [limit: [%Ash.Error.Query.InvalidLimit{limit: 101}]]
+               errors: [limit: [%InvalidLimit{limit: 101}]]
              } =
                Validation.validate_pagination(params, for: Comment, replace_invalid_params?: true)
     end
