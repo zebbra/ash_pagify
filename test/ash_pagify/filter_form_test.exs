@@ -8,6 +8,7 @@ defmodule AshPagify.FilterFormTest do
   alias AshPagify.Factory.Post
   alias AshPagify.FilterForm
   alias AshPhoenix.FilterForm.Predicate
+  alias Plug.Conn.Query
 
   require Ash.Query
 
@@ -755,9 +756,9 @@ defmodule AshPagify.FilterFormTest do
       encoded =
         form
         |> FilterForm.params_for_query()
-        |> Plug.Conn.Query.encode()
+        |> Query.encode()
 
-      decoded = Plug.Conn.Query.decode(encoded)
+      decoded = Query.decode(encoded)
 
       assert [predicate_form] =
                Post

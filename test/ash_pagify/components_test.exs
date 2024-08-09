@@ -9,6 +9,7 @@ defmodule AshPagify.ComponentsTest do
   import AshPagify.TestHelpers
   import Phoenix.LiveViewTest
 
+  alias AshPagify.Error.Components.PathOrJSError
   alias AshPagify.Factory.Post
   alias AshPagify.Meta
   alias Phoenix.LiveView.JS
@@ -743,7 +744,7 @@ defmodule AshPagify.ComponentsTest do
     test "raises if neither path nor on_paginate are passed" do
       assigns = %{meta: build(:meta_on_second_page)}
 
-      assert_raise AshPagify.Error.Components.PathOrJSError,
+      assert_raise PathOrJSError,
                    fn ->
                      rendered_to_string(~H"""
                      <AshPagify.Components.pagination meta={@meta} />
@@ -2407,7 +2408,7 @@ defmodule AshPagify.ComponentsTest do
     end
 
     test "raises if neither path nor on_sort are passed" do
-      assert_raise AshPagify.Error.Components.PathOrJSError,
+      assert_raise PathOrJSError,
                    fn ->
                      render_component(&table/1,
                        __changed__: nil,

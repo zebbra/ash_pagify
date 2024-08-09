@@ -1021,7 +1021,7 @@ defmodule AshPagify.FilterForm do
 
       %{"empty" => %{}} ->
         Map.update!(params, "components", fn components ->
-          Map.drop(components, ["empty"])
+          Map.delete(components, "empty")
         end)
 
       _ ->
