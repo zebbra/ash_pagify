@@ -29,9 +29,9 @@ defmodule AshPagify.Validation do
       |> Keyword.put_new(:for, resource)
       |> Keyword.put_new(:replace_invalid_params?, false)
 
-    opts = Misc.maybe_put_compiled_ash_pagify_scopes(resource, opts)
-    ash_pagify_scopes = Keyword.get(opts, :__compiled_ash_pagify_scopes)
-    default_scopes = Keyword.get(opts, :__compiled_ash_pagify_default_scopes)
+    opts = Misc.maybe_put_compiled_scopes(resource, opts)
+    scopes = Keyword.get(opts, :__compiled_scopes)
+    default_scopes = Keyword.get(opts, :__compiled_default_scopes)
 
     maybe_valid_params =
       params
@@ -42,7 +42,7 @@ defmodule AshPagify.Validation do
       )
       |> Map.put(:errors, [])
       |> validate_search(opts)
-      |> validate_scopes(ash_pagify_scopes, default_scopes, opts)
+      |> validate_scopes(scopes, default_scopes, opts)
       |> validate_filter_form(opts)
       |> validate_filters(opts)
       |> validate_order_by(opts)
@@ -154,21 +154,21 @@ defmodule AshPagify.Validation do
 
   ## Examples
 
-      iex> ash_pagify_scopes = %{}
-      iex> AshPagify.Validation.validate_scopes(%{}, ash_pagify_scopes)
+      iex> scopes = %{}
+      iex> AshPagify.Validation.validate_scopes(%{}, scopes)
       %{}
 
-      iex> ash_pagify_scopes = %{}
-      iex> AshPagify.Validation.validate_scopes(%{scopes: nil}, ash_pagify_scopes)
+      iex> scopes = %{}
+      iex> AshPagify.Validation.validate_scopes(%{scopes: nil}, scopes)
       %{scopes: nil}
 
-      iex> ash_pagify_scopes = %{}
-      iex> %{scopes: scopes} = AshPagify.Validation.validate_scopes(%{scopes: %{role: :admin}}, ash_pagify_scopes)
+      iex> scopes = %{}
+      iex> %{scopes: scopes} = AshPagify.Validation.validate_scopes(%{scopes: %{role: :admin}}, scopes)
       iex> scopes
       %{role: :admin}
 
-      iex> ash_pagify_scopes = %{}
-      iex> %{scopes: scopes, errors: errors} = AshPagify.Validation.validate_scopes(%{scopes: %{role: :non_existent}}, ash_pagify_scopes)
+      iex> scopes = %{}
+      iex> %{scopes: scopes, errors: errors} = AshPagify.Validation.validate_scopes(%{scopes: %{role: :non_existent}}, scopes)
       iex> scopes
       %{role: :non_existent}
       iex> AshPagify.Error.clear_stacktrace(errors)
@@ -178,8 +178,8 @@ defmodule AshPagify.Validation do
         ]
       ]
 
-      iex> ash_pagify_scopes = %{}
-      iex> %{scopes: scopes, errors: errors} = AshPagify.Validation.validate_scopes(%{scopes: %{role: :non_existent}}, ash_pagify_scopes, nil, replace_invalid_params?: true)
+      iex> scopes = %{}
+      iex> %{scopes: scopes, errors: errors} = AshPagify.Validation.validate_scopes(%{scopes: %{role: :non_existent}}, scopes, nil, replace_invalid_params?: true)
       iex> scopes
       nil
       iex> AshPagify.Error.clear_stacktrace(errors)
@@ -189,8 +189,8 @@ defmodule AshPagify.Validation do
         ]
       ]
 
-      iex> ash_pagify_scopes = %{}
-      iex> %{scopes: scopes, errors: errors} = AshPagify.Validation.validate_scopes(%{scopes: %{non_existent: :admin}}, ash_pagify_scopes)
+      iex> scopes = %{}
+      iex> %{scopes: scopes, errors: errors} = AshPagify.Validation.validate_scopes(%{scopes: %{non_existent: :admin}}, scopes)
       iex> scopes
       %{non_existent: :admin}
       iex> AshPagify.Error.clear_stacktrace(errors)
@@ -200,8 +200,8 @@ defmodule AshPagify.Validation do
         ]
       ]
 
-      iex> ash_pagify_scopes = %{}
-      iex> %{scopes: scopes, errors: errors} = AshPagify.Validation.validate_scopes(%{scopes: %{non_existent: :admin}}, ash_pagify_scopes, nil, replace_invalid_params?: true)
+      iex> scopes = %{}
+      iex> %{scopes: scopes, errors: errors} = AshPagify.Validation.validate_scopes(%{scopes: %{non_existent: :admin}}, scopes, nil, replace_invalid_params?: true)
       iex> scopes
       nil
       iex> AshPagify.Error.clear_stacktrace(errors)
@@ -212,12 +212,12 @@ defmodule AshPagify.Validation do
       ]
   """
   @spec validate_scopes(map(), map(), map() | nil, Keyword.t()) :: map()
-  def validate_scopes(params, ash_pagify_scopes, default_scopes \\ nil, opts \\ [])
+  def validate_scopes(params, scopes, default_scopes \\ nil, opts \\ [])
 
   def validate_scopes(%{scopes: nil} = params, _, default_scopes, _), do: maybe_put_default_scopes(params, default_scopes)
 
-  def validate_scopes(%{scopes: scopes} = params, ash_pagify_scopes, default_scopes, opts) when is_map(scopes) do
-    case parse_scopes(scopes, ash_pagify_scopes, default_scopes) do
+  def validate_scopes(%{scopes: params_scopes} = params, scopes, default_scopes, opts) when is_map(params_scopes) do
+    case parse_scopes(params_scopes, scopes, default_scopes) do
       {:ok, scopes} ->
         Map.put(params, :scopes, scopes)
 
@@ -249,10 +249,10 @@ defmodule AshPagify.Validation do
     end
   end
 
-  defp parse_scopes(scopes, ash_pagify_scopes, default_scopes) do
+  defp parse_scopes(params_scopes, scopes, default_scopes) do
     {valid_scopes, errors} =
-      Enum.reduce(scopes, {%{}, []}, fn {group, name}, {valid_scopes, errors} ->
-        case validate_scope(group, name, ash_pagify_scopes) do
+      Enum.reduce(params_scopes, {%{}, []}, fn {group, name}, {valid_scopes, errors} ->
+        case validate_scope(group, name, scopes) do
           {:ok, valid_group, valid_name} ->
             {Map.put(valid_scopes, valid_group, valid_name), errors}
 
@@ -297,30 +297,30 @@ defmodule AshPagify.Validation do
     end
   end
 
-  defp validate_scope(group, name, ash_pagify_scopes) when is_binary(group) and is_binary(name) do
+  defp validate_scope(group, name, scopes) when is_binary(group) and is_binary(name) do
     validate_scope(
       String.to_existing_atom(group),
       String.to_existing_atom(name),
-      ash_pagify_scopes
+      scopes
     )
   rescue
     _ -> :error
   end
 
-  defp validate_scope(group, name, ash_pagify_scopes) do
-    if scope_name_exists?(group, name, ash_pagify_scopes) do
+  defp validate_scope(group, name, scopes) do
+    if scope_name_exists?(group, name, scopes) do
       {:ok, group, name}
     else
       :error
     end
   end
 
-  defp scope_name_exists?(group, name, ash_pagify_scopes) do
-    scope_group_exists?(group, ash_pagify_scopes) and
-      Enum.find(ash_pagify_scopes[group], &(&1.name == name)) != nil
+  defp scope_name_exists?(group, name, scopes) do
+    scope_group_exists?(group, scopes) and
+      Enum.find(scopes[group], &(&1.name == name)) != nil
   end
 
-  defp scope_group_exists?(group, ash_pagify_scopes), do: Map.has_key?(ash_pagify_scopes, group)
+  defp scope_group_exists?(group, scopes), do: Map.has_key?(scopes, group)
 
   # Form filter validation
 
@@ -748,7 +748,7 @@ defmodule AshPagify.Validation do
 
   defp validate_limit(%{limit: limit} = params, opts) when is_integer(limit) do
     if limit > 0 do
-      max_limit = Keyword.get(opts, :max_limit, AshPagify.get_option(:max_limit, opts))
+      max_limit = Keyword.get(opts, :max_limit, Misc.get_option(:max_limit, opts))
       validate_within_max_limit(params, max_limit)
     else
       {:error, add_error(params, :limit, InvalidLimit.exception(limit: limit))}
@@ -793,7 +793,7 @@ defmodule AshPagify.Validation do
     if Keyword.get(opts, :default_limit) == false do
       nil
     else
-      AshPagify.get_option(:default_limit, opts)
+      Misc.get_option(:default_limit, opts)
     end
   end
 

@@ -919,7 +919,7 @@ defmodule AshPagify.Components do
   ## Default parameters
 
   Default parameters for the limit, scopes, filter_form and order parameters
-  are omitted. The defaults are determined by calling `AshPagify.get_option/3`.
+  are omitted. The defaults are determined by calling `AshPagify.Misc.get_option/3`.
 
   - Pass the `:for` option to pick up the default values from an `Ash.Resource`.
   - If the `Ash.Resource` has no default options set, the function will fall
@@ -984,9 +984,9 @@ defmodule AshPagify.Components do
   """
   @spec to_query(AshPagify.t(), Keyword.t()) :: Keyword.t()
   def to_query(%AshPagify{} = ash_pagify, opts \\ []) do
-    default_limit = AshPagify.get_option(:default_limit, opts)
+    default_limit = Misc.get_option(:default_limit, opts)
 
-    default_order = :default_order |> AshPagify.get_option(opts, nil) |> AshPagify.concat_sort()
+    default_order = :default_order |> Misc.get_option(opts, nil) |> AshPagify.concat_sort()
     current_order = AshPagify.concat_sort(ash_pagify.order_by)
 
     []

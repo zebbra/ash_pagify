@@ -71,6 +71,7 @@ defmodule AshPagify.MixProject do
       groups_for_modules: [
         Core: [
           AshPagify,
+          AshPagify.Guards,
           AshPagify.Meta,
           AshPagify.Misc,
           AshPagify.Tsearch,

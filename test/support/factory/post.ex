@@ -9,29 +9,26 @@ defmodule AshPagify.Factory.Post do
 
   require Ash.Expr
 
-  @default_limit 15
-  def default_limit, do: @default_limit
-
-  @ash_pagify_scopes %{
-    role: [
-      %{name: :admin, filter: %{author: "John"}},
-      %{name: :user, filter: %{author: "Doe"}}
-    ],
-    status: [
-      %{name: :all, filter: nil, default?: true},
-      %{name: :active, filter: %{age: %{lt: 10}}},
-      %{name: :inactive, filter: %{age: %{gte: 10}}}
-    ]
-  }
-  def ash_pagify_scopes, do: @ash_pagify_scopes
-
-  def full_text_search do
-    [
+  @ash_pagify_options %{
+    default_limit: 15,
+    scopes: %{
+      role: [
+        %{name: :admin, filter: %{author: "John"}},
+        %{name: :user, filter: %{author: "Doe"}}
+      ],
+      status: [
+        %{name: :all, filter: nil, default?: true},
+        %{name: :active, filter: %{age: %{lt: 10}}},
+        %{name: :inactive, filter: %{age: %{gte: 10}}}
+      ]
+    },
+    full_text_search: [
       tsvector_column: [
         custom_tsvector: Ash.Expr.expr(custom_tsvector)
       ]
     ]
-  end
+  }
+  def ash_pagify_options, do: @ash_pagify_options
 
   ets do
     private? true
@@ -89,7 +86,11 @@ defmodule AshPagify.Factory.Post do
     read :read do
       primary? true
       argument :sort, :string, allow_nil?: true
-      pagination offset?: true, default_limit: @default_limit, countable: true, required?: false
+
+      pagination offset?: true,
+                 default_limit: @ash_pagify_options.default_limit,
+                 countable: true,
+                 required?: false
     end
 
     create :create do

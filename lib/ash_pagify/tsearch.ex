@@ -262,20 +262,10 @@ defmodule AshPagify.Tsearch do
   """
   def merge_opts(opts \\ []) do
     default_opts()
-    |> Misc.list_merge(Misc.get_global_opts(:full_text_search))
-    |> Misc.list_merge(resource_option(Keyword.get(opts, :for)))
+    |> Misc.list_merge(Misc.global_option(:full_text_search) || [])
+    |> Misc.list_merge(Misc.resource_option(Keyword.get(opts, :for), :full_text_search) || [])
     |> Misc.list_merge(Keyword.get(opts, :full_text_search, []))
   end
-
-  defp resource_option(resource) when is_atom(resource) and resource != nil do
-    if Keyword.has_key?(resource.__info__(:functions), :full_text_search) do
-      resource.full_text_search()
-    else
-      []
-    end
-  end
-
-  defp resource_option(_), do: []
 
   @doc """
   Returns the tsvector expression for the given options.

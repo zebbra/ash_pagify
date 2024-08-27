@@ -3,28 +3,173 @@ defmodule AshPagify.Misc do
   Miscellaneous functions for AshPagify.
   """
 
+  import AshPagify.Guards, only: [is_valid_option: 1]
+
   @doc """
-  Returns the global opts derived from a function referenced in the application
+  Returns the option with the given key.
+
+  The look-up order is:
+
+  1. the keyword list passed as the second argument
+  2. the Ash.Resource resource, if the passed list includes the `:for` option
+  3. the application environment
+  4. the AshPagify default value if defined
+  5. the default passed as the last argument
+
+  For the `:scopes` option, the function will deep merge the options
+  in reverse order (keyword overrides resource, resource overrides global, etc.)
+
+  ## Examples for `:scopes`
+
+      iex> alias AshPagify.Factory.Post
+      iex> opts = [
+      ...>   scopes: %{
+      ...>     role: [
+      ...>       %{name: :user, filter: %{name: "changed"}},
+      ...>       %{name: :other, filter: %{name: "other"}}
+      ...>     ],
+      ...>     status: [
+      ...>       %{name: :all, filter: nil, default?: true},
+      ...>       %{name: :active, filter: %{age: %{lt: 10}}},
+      ...>       %{name: :inactive, filter: %{age: %{gte: 10}}}
+      ...>     ]
+      ...>   },
+      ...>   for: Post
+      ...> ]
+      iex> get_option(:scopes, opts, %{
+      ...>   role: [
+      ...>     %{name: :default, filter: %{author: "Default"}}
+      ...>   ]
+      ...> })
+      %{
+        role: [
+          %{name: :admin, filter: %{author: "John"}},
+          %{name: :user, filter: %{name: "changed"}},
+          %{name: :other, filter: %{name: "other"}},
+          %{name: :default, filter: %{author: "Default"}}
+        ],
+        status: [
+          %{name: :inactive, filter: %{age: %{gte: 10}}},
+          %{name: :all, filter: nil, default?: true},
+          %{name: :active, filter: %{age: %{lt: 10}}}
+        ]
+      }
+  """
+  @spec get_option(atom(), Keyword.t(), any()) :: any()
+  def get_option(key, opts \\ [], default \\ nil)
+
+  def get_option(key, _opts, _default) when is_valid_option(key) == false do
+    raise ArgumentError, "Unknown option: #{inspect(key)}"
+  end
+
+  def get_option(:scopes, opts, default) do
+    opts_scopes = Keyword.get(opts, :scopes, %{})
+    resource_scopes = resource_option(opts[:for], :scopes) || %{}
+    global_scopes = global_option(:scopes) || %{}
+    default_scopes = Keyword.get(AshPagify.default_opts(), :scopes, %{})
+    default = default || %{}
+
+    default
+    |> merge_scopes(default_scopes)
+    |> merge_scopes(global_scopes)
+    |> merge_scopes(resource_scopes)
+    |> merge_scopes(opts_scopes)
+  end
+
+  def get_option(key, opts, default) do
+    with nil <- opts[key],
+         nil <- resource_option(opts[:for], key),
+         nil <- global_option(key) do
+      Keyword.get(AshPagify.default_opts(), key, default)
+    end
+  end
+
+  @doc """
+  Returns the resource option derived from a map or a function reference in the resource
+  ash_pagfiy_options function.
+  """
+  @spec resource_option(atom(), atom()) :: any()
+  def resource_option(resource, key)
+  def resource_option(nil, _key), do: nil
+  def resource_option(resource, _key) when is_atom(resource) == false, do: nil
+
+  def resource_option(resource, key) when key == :default_order do
+    resource |> Ash.Resource.Info.preparations() |> resource_preparation_sort()
+  end
+
+  def resource_option(resource, key) do
+    resolve_opts_func_or_map(:resource, key, resource)
+  end
+
+  @doc """
+  Returns the global option derived from a map or a function referenced in the application
   environment.
   """
-  @spec get_global_opts(atom) :: keyword
-  def get_global_opts(component) when component in [:pagination, :table, :full_text_search] do
-    case opts_func(component) do
-      nil -> []
+  @spec global_option(atom()) :: any()
+  def global_option(key) when is_atom(key) do
+    resolve_opts_func_or_map(:global, key)
+  end
+
+  defp merge_scopes(nil, default), do: default
+
+  defp merge_scopes(opts, default) do
+    Map.merge(default, opts, fn _key, default_val, opts_val ->
+      merge_scope_lists(default_val, opts_val)
+    end)
+  end
+
+  defp merge_scope_lists(default_list, opts_list) do
+    default_map = Map.new(default_list, &{&1[:name], &1})
+    opts_map = Map.new(opts_list, &{&1[:name], &1})
+
+    merged_map =
+      Map.merge(default_map, opts_map, fn _key, default_item, opts_item ->
+        Map.merge(opts_item, default_item)
+      end)
+
+    merged_map |> Map.values() |> Enum.reverse()
+  end
+
+  defp resource_preparation_sort(preparations, default \\ nil)
+  defp resource_preparation_sort([], default), do: default
+
+  defp resource_preparation_sort([%Ash.Resource.Preparation{preparation: {_, [options: [sort: sort]]}} | _rest], _default)
+       when is_list(sort) do
+    sort
+  end
+
+  defp resource_preparation_sort([_ | rest], default) do
+    resource_preparation_sort(rest, default)
+  end
+
+  defp resolve_opts_func_or_map(scope, key, resource \\ nil) do
+    case opts_func_or_map(scope, key, resource) do
       {module, func} -> apply(module, func, [])
       config -> config
     end
   end
 
-  defp opts_func(component) do
+  defp opts_func_or_map(:global, key, nil) do
     :ash_pagify
-    |> Application.get_env(component, [])
-    |> maybe_get_opts()
+    |> Application.get_env(key, nil)
+    |> maybe_get_opts(key)
   end
 
-  defp maybe_get_opts(config) do
-    Keyword.get(config, :opts, config)
+  defp opts_func_or_map(:resource, key, resource) do
+    if Keyword.has_key?(resource.__info__(:functions), :ash_pagify_options) do
+      resource.ash_pagify_options()
+      |> Map.get(key)
+      |> maybe_get_opts(key)
+    end
   end
+
+  defp maybe_get_opts(nil, _), do: nil
+
+  defp maybe_get_opts(config, key) when key in [:pagination, :table] do
+    Keyword.get(config, :opts)
+  end
+
+  defp maybe_get_opts(config, _), do: config
 
   @doc """
   Deep merges two lists, preferring values from the right list.
@@ -579,8 +724,8 @@ defmodule AshPagify.Misc do
       Keyword.get(opts, :default_scopes, %{})
     else
       resource = Keyword.get(opts, :for)
-      opts = maybe_put_compiled_ash_pagify_scopes(resource, opts)
-      Keyword.get(opts, :__compiled_ash_pagify_default_scopes, %{})
+      opts = maybe_put_compiled_scopes(resource, opts)
+      Keyword.get(opts, :__compiled_default_scopes, %{})
     end
   end
 
@@ -596,10 +741,10 @@ defmodule AshPagify.Misc do
   ## Example
 
       iex> alias AshPagify.Factory.Post
-      iex> AshPagify.Misc.maybe_put_compiled_ash_pagify_scopes(Post)
+      iex> AshPagify.Misc.maybe_put_compiled_scopes(Post)
       [
-        __compiled_ash_pagify_default_scopes: %{status: :all},
-        __compiled_ash_pagify_scopes: %{
+        __compiled_default_scopes: %{status: :all},
+        __compiled_scopes: %{
           role: [
             %{name: :admin, filter: %{author: "John"}},
             %{name: :user, filter: %{author: "Doe"}}
@@ -615,11 +760,11 @@ defmodule AshPagify.Misc do
   Or with default scopes passed as opts
 
       iex> alias AshPagify.Factory.Post
-      iex> ash_pagify_scopes = %{role: [%{name: :user, filter: %{author: "Doe"}, default?: true}]}
-      iex> AshPagify.Misc.maybe_put_compiled_ash_pagify_scopes(Post, [ash_pagify_scopes: ash_pagify_scopes])
+      iex> scopes = %{role: [%{name: :user, filter: %{author: "Doe"}, default?: true}]}
+      iex> AshPagify.Misc.maybe_put_compiled_scopes(Post, [scopes: scopes])
       [
-        __compiled_ash_pagify_default_scopes: %{role: :user, status: :all},
-        __compiled_ash_pagify_scopes: %{
+        __compiled_default_scopes: %{role: :user, status: :all},
+        __compiled_scopes: %{
           role: [
             %{name: :admin, filter: %{author: "John"}},
             %{name: :user, filter: %{author: "Doe"}, default?: true}
@@ -630,36 +775,35 @@ defmodule AshPagify.Misc do
             %{name: :inactive, filter: %{age: %{gte: 10}}}
           ]
         },
-        ash_pagify_scopes: ash_pagify_scopes
+        scopes: scopes
       ]
   """
-  @spec maybe_put_compiled_ash_pagify_scopes(Ash.Query.t() | Ash.Resource.t(), Keyword.t()) ::
+  @spec maybe_put_compiled_scopes(Ash.Query.t() | Ash.Resource.t(), Keyword.t()) ::
           Keyword.t()
-  def maybe_put_compiled_ash_pagify_scopes(query_or_resource, opts \\ [])
+  def maybe_put_compiled_scopes(query_or_resource, opts \\ [])
 
-  def maybe_put_compiled_ash_pagify_scopes(%Ash.Query{resource: resource}, opts) do
-    maybe_put_compiled_ash_pagify_scopes(resource, opts)
+  def maybe_put_compiled_scopes(%Ash.Query{resource: resource}, opts) do
+    maybe_put_compiled_scopes(resource, opts)
   end
 
-  def maybe_put_compiled_ash_pagify_scopes(resource, opts) do
+  def maybe_put_compiled_scopes(resource, opts) do
     if scopes_compiled?(opts) do
       opts
     else
-      ash_pagify_scopes =
-        AshPagify.get_option(:ash_pagify_scopes, Keyword.put(opts, :for, resource))
+      scopes = get_option(:scopes, Keyword.put(opts, :for, resource))
 
       opts
-      |> Keyword.put(:__compiled_ash_pagify_scopes, ash_pagify_scopes)
-      |> Keyword.put(:__compiled_ash_pagify_default_scopes, default_scopes(ash_pagify_scopes))
+      |> Keyword.put(:__compiled_scopes, scopes)
+      |> Keyword.put(:__compiled_default_scopes, default_scopes(scopes))
     end
   end
 
   defp scopes_compiled?(opts) do
-    Keyword.has_key?(opts, :__compiled_ash_pagify_scopes)
+    Keyword.has_key?(opts, :__compiled_scopes)
   end
 
-  defp default_scopes(ash_pagify_scopes) do
-    ash_pagify_scopes
+  defp default_scopes(scopes) do
+    scopes
     |> Enum.reduce(%{}, fn {group, scopes}, acc ->
       Enum.reduce(scopes, acc, fn scope, acc -> maybe_put_default_scope(acc, group, scope) end)
     end)
