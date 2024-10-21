@@ -155,15 +155,15 @@ defmodule YourApp.Resource.Post
   use AshPagify.Tsearch
   require Ash.Expr
 
-  @ash_pagify_options {
+  @ash_pagify_options %{
     default_limit: 15,
-    scopes: [
+    scopes: %{
       role: [
         %{name: :all, filter: nil},
         %{name: :admin, filter: %{author: "John"}},
         %{name: :user, filter: %{author: "Doe"}}
       ]
-    ]
+    }
   }
   def ash_pagify_options, do: @ash_pagify_options
 
