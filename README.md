@@ -103,7 +103,7 @@ Then simply add `ash_pagify` to your list of dependencies in `mix.exs` and run
 ```elixir
 def deps do
   [
-    {:ash_pagify, "~> 1.1.0"}
+    {:ash_pagify, "~> 1.1.1"}
   ]
 end
 ```
