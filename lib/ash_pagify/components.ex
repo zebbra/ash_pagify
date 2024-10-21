@@ -646,7 +646,7 @@ defmodule AshPagify.Components do
     Overrides the default function that retrieves the row ID from a stream item.
     """
 
-  attr :row_click, JS,
+  attr :row_click, :any,
     default: nil,
     doc: """
     Sets the `phx-click` function attribute for each row `td`. Expects to be a
@@ -810,7 +810,6 @@ defmodule AshPagify.Components do
   end
 
   slot :foot,
-    default: nil,
     doc: """
     You can optionally add a `foot`. The inner block will be rendered inside
     a `tfoot` element.
