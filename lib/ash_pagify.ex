@@ -302,13 +302,17 @@ defmodule AshPagify do
     opts = parse(q, ash_pagify, opts)
     opts = remove_ash_pagify_opts(opts)
 
+    {load, opts} = Keyword.pop(opts, :load)
+
     case Keyword.get(opts, :action) do
       nil ->
-        r.read!(opts)
+        opts
+        |> r.read!()
+        |> maybe_load(load)
 
       action ->
         {:ok, page} = apply(r, action, [args, opts])
-        page
+        maybe_load(page, load)
     end
   end
 
@@ -320,6 +324,14 @@ defmodule AshPagify do
     Enum.filter(opts, fn {k, _} ->
       !Enum.member?(@default_opts_keys, k) and !Enum.member?(@internal_opts, k)
     end)
+  end
+
+  @spec maybe_load(Offset.t(), Keyword.t() | nil) :: Offset.t()
+  defp maybe_load(page, load)
+  defp maybe_load(page, nil), do: page
+
+  defp maybe_load(page, load) do
+    Ash.load!(page, load, strict?: true, lazy?: true)
   end
 
   @doc """
