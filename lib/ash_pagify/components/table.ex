@@ -16,6 +16,9 @@ defmodule AshPagify.Components.Table do
       container: false,
       container_attrs: [class: "table-container"],
       no_results_content: Phoenix.HTML.raw("<p>No results.</p>"),
+      loading_content: Phoenix.HTML.raw("<p>Loading...</p>"),
+      loading_items: 15,
+      error_content: Phoenix.HTML.raw("<p>Error.</p>"),
       symbol_asc: "▴",
       symbol_attrs: [class: "order-direction"],
       symbol_desc: "▾",
@@ -53,6 +56,7 @@ defmodule AshPagify.Components.Table do
   attr :row_click, JS, default: nil
   attr :row_item, :any, required: true
   attr :action, :any, required: true
+  attr :loading, :boolean, default: false
 
   def render(assigns) do
     assigns =
@@ -106,23 +110,38 @@ defmodule AshPagify.Components.Table do
         phx-update={match?(%Phoenix.LiveView.LiveStream{}, @items) && "stream"}
         {@opts[:tbody_attrs]}
       >
-        <tr
-          :for={item <- @items}
-          id={@row_id && @row_id.(item)}
-          {maybe_invoke_options_callback(@opts[:tbody_tr_attrs], item, assigns)}
-        >
-          <td
-            :for={col <- @col}
-            :if={show_column?(col)}
-            {merge_td_attrs(@opts[:tbody_td_attrs], col, item)}
-            phx-click={@row_click && @row_click.(item)}
+        <%= if @loading do %>
+          <tr :for={_ <- 1..@opts[:loading_items]}>
+            <td
+              :for={col <- @col}
+              :if={show_column?(col)}
+              {merge_td_attrs(@opts[:tbody_td_attrs], col, nil)}
+            >
+              <%= @opts[:loading_content] %>
+            </td>
+            <td :for={action <- @action} {merge_td_attrs(@opts[:tbody_td_attrs], action, nil)}>
+              <%= @opts[:loading_content] %>
+            </td>
+          </tr>
+        <% else %>
+          <tr
+            :for={item <- @items}
+            id={@row_id && @row_id.(item)}
+            {maybe_invoke_options_callback(@opts[:tbody_tr_attrs], item, assigns)}
           >
-            <%= render_slot(col, @row_item.(item)) %>
-          </td>
-          <td :for={action <- @action} {merge_td_attrs(@opts[:tbody_td_attrs], action, item)}>
-            <%= render_slot(action, @row_item.(item)) %>
-          </td>
-        </tr>
+            <td
+              :for={col <- @col}
+              :if={show_column?(col)}
+              {merge_td_attrs(@opts[:tbody_td_attrs], col, item)}
+              phx-click={@row_click && @row_click.(item)}
+            >
+              <%= render_slot(col, @row_item.(item)) %>
+            </td>
+            <td :for={action <- @action} {merge_td_attrs(@opts[:tbody_td_attrs], action, item)}>
+              <%= render_slot(action, @row_item.(item)) %>
+            </td>
+          </tr>
+        <% end %>
       </tbody>
       <tfoot :if={@foot != []}><%= render_slot(@foot) %></tfoot>
     </table>

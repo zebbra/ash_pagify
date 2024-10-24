@@ -233,6 +233,12 @@ defmodule AshPagify.Components do
     Default: `#{inspect(Table.default_opts()[:container_attrs])}`.
   - `:no_results_content` - Any content that should be rendered if there are no
     results. Default: `<p>No results.</p>`.
+  - `:loading_content` - Any content that should be rendered while the table is
+    loading. Default: `<p>Loading...</p>`.
+  - `:loading_items` - The number of items that are displayed while the table is
+    loading. Default: `#{inspect(Table.default_opts()[:loading_items])}`.
+  - `:error_content` - Any content that should be rendered if there is an error.
+    Default: `<p>Something went wrong.</p>`.
   - `:table_attrs` - The attributes for the `<table>` element.
     Default: `#{inspect(Table.default_opts()[:table_attrs])}`.
   - `:th_wrapper_attrs` - The attributes for the `<span>` element that wraps the
@@ -270,6 +276,9 @@ defmodule AshPagify.Components do
           {:container, boolean}
           | {:container_attrs, keyword}
           | {:no_results_content, Phoenix.HTML.safe() | binary}
+          | {:loading_content, Phoenix.HTML.safe() | binary}
+          | {:loading_items, number}
+          | {:error_content, Phoenix.HTML.safe() | binary}
           | {:symbol_asc, Phoenix.HTML.safe() | binary}
           | {:symbol_attrs, keyword}
           | {:symbol_desc, Phoenix.HTML.safe() | binary}
@@ -577,6 +586,18 @@ defmodule AshPagify.Components do
     by the query.
     """
 
+  attr :loading, :boolean,
+    default: false,
+    doc: """
+    If set to `true`, the table will render the `:loading_content` option.
+    """
+
+  attr :error, :boolean,
+    default: false,
+    doc: """
+    If set to `true`, the table will render the `:error_content` option.
+    """
+
   attr :meta, Meta,
     default: nil,
     doc: "The `AshPagify.Meta` struct returned by the query function. If omitted
@@ -835,6 +856,15 @@ defmodule AshPagify.Components do
     table(assigns)
   end
 
+  def table(%{error: true, opts: opts} = assigns) do
+    assigns =
+      assign(assigns, :opts, Table.merge_opts(opts))
+
+    ~H"""
+    <%= @opts[:error_content] %>
+    """
+  end
+
   def table(%{meta: meta, opts: opts} = assigns) do
     assigns =
       assigns
@@ -842,7 +872,7 @@ defmodule AshPagify.Components do
       |> assign_new(:id, fn -> table_id(meta.resource) end)
 
     ~H"""
-    <%= if empty?(@items) do %>
+    <%= if !@loading and empty?(@items) do %>
       <%= @opts[:no_results_content] %>
     <% else %>
       <%= if @opts[:container] do %>
@@ -863,6 +893,7 @@ defmodule AshPagify.Components do
             row_click={@row_click}
             row_item={@row_item}
             action={@action}
+            loading={@loading}
           />
         </div>
       <% else %>
@@ -882,6 +913,7 @@ defmodule AshPagify.Components do
           row_click={@row_click}
           row_item={@row_item}
           action={@action}
+          loading={@loading}
         />
       <% end %>
     <% end %>
@@ -1219,7 +1251,7 @@ defmodule AshPagify.Components do
       |> Query.decode()
       |> Map.merge(Misc.remove_nil_values(ash_pagify_params))
 
-    query = unless query == %{}, do: Query.encode(query)
+    query = if query != %{}, do: Query.encode(query)
 
     uri
     |> Map.put(:query, query)
@@ -1251,7 +1283,7 @@ defmodule AshPagify.Components do
       iex> build_scope_path("/posts", meta, %{status: :active})
       "/posts?limit=10&scopes[status]=active"
   """
-  @spec build_scope_path(pagination_path(), Meta.t(), map(), Keyword.t()) :: String.t()
+  @spec build_scope_path(pagination_path(), Meta.t() | nil, map(), Keyword.t()) :: String.t()
   def build_scope_path(path, meta, scope, opts \\ [])
 
   def build_scope_path(
@@ -1269,5 +1301,9 @@ defmodule AshPagify.Components do
     ash_pagify = AshPagify.set_scope(ash_pagify, scope)
 
     build_path(path, ash_pagify, opts)
+  end
+
+  def build_scope_path(path, nil, scope, opts) do
+    build_path(path, [scopes: scope], opts)
   end
 end

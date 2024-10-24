@@ -26,6 +26,8 @@ defmodule AshPagify.ComponentsTest do
   attr :meta, Meta, default: %Meta{ash_pagify: %AshPagify{}}
   attr :opts, :list, default: [table_attrs: [class: "some-table"]]
   attr :target, :string, default: nil
+  attr :loading, :boolean, default: false
+  attr :error, :boolean, default: false
   attr :path, :any, default: {__MODULE__, :route_helper, @route_helper_opts}
 
   attr :items, :list,
@@ -44,6 +46,8 @@ defmodule AshPagify.ComponentsTest do
       opts={@opts}
       path={@path}
       target={@target}
+      loading={@loading}
+      error={@error}
     >
       <:col :let={post} label="Name" field={:name}><%= post.name %></:col>
       <:col :let={post} label="Email" field={:email}><%= post.email %></:col>
@@ -2124,6 +2128,49 @@ defmodule AshPagify.ComponentsTest do
              }) == [{"div", [], ["Nothing!"]}]
     end
 
+    test "allows to set loading_content" do
+      html =
+        render_table(%{
+          loading: true,
+          items: [],
+          opts: [
+            loading_items: 1,
+            loading_content: custom_loading_content()
+          ]
+        })
+
+      assert [
+               {"table", [{"id", "some_table"}],
+                [
+                  {"thead", _, _},
+                  {
+                    "tbody",
+                    [{"id", "some_table_tbody"}],
+                    [
+                      {"tr", [],
+                       [
+                         {"td", [], [{"div", [], ["It's loading!"]}]},
+                         {"td", [], [{"div", [], ["It's loading!"]}]},
+                         {"td", [], [{"div", [], ["It's loading!"]}]},
+                         {"td", [], [{"div", [], ["It's loading!"]}]},
+                         {"td", [], [{"div", [], ["It's loading!"]}]}
+                       ]}
+                    ]
+                  }
+                ]}
+             ] = html
+    end
+
+    test "allows to set error_content" do
+      assert render_table(%{
+               error: true,
+               items: [],
+               opts: [
+                 error_content: custom_error_content()
+               ]
+             }) == [{"div", [], ["Crap!"]}]
+    end
+
     test "renders row_click" do
       assigns = %{}
 
@@ -2515,6 +2562,22 @@ defmodule AshPagify.ComponentsTest do
 
     ~H"""
     <div>Nothing!</div>
+    """
+  end
+
+  defp custom_loading_content do
+    assigns = %{}
+
+    ~H"""
+    <div>It's loading!</div>
+    """
+  end
+
+  defp custom_error_content do
+    assigns = %{}
+
+    ~H"""
+    <div>Crap!</div>
     """
   end
 end

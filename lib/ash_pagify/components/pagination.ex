@@ -48,6 +48,8 @@ defmodule AshPagify.Components.Pagination do
   def max_pages(:hide, _), do: 0
   def max_pages({:ellipsis, max_pages}, _), do: max_pages
 
+  def show_pagination(nil), do: false
+
   def show_pagination?(%Meta{errors: [], total_pages: total_pages}) do
     total_pages > 1
   end
