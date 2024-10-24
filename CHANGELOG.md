@@ -5,6 +5,17 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v1.2.0](https://github.com/zebbra/ash_pagify/compare/v1.1.1...v1.2.0) (2024-10-24)
+
+
+
+
+### Features:
+
+* table: add loading and error states
+
+* Ash.load: lazy load load_statement in opts
+
 ## [v1.1.1](https://github.com/zebbra/ash_pagify/compare/v1.1.0...v1.1.1) (2024-10-21)
 
 
