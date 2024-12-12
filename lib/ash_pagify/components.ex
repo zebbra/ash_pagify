@@ -423,7 +423,7 @@ defmodule AshPagify.Components do
         on_paginate={@on_paginate}
         {@opts[:previous_link_attrs]}
       >
-        <%= @opts[:previous_link_content] %>
+        {@opts[:previous_link_content]}
       </.pagination_link>
       <.page_links
         :if={@opts[:page_links] != :hide}
@@ -442,7 +442,7 @@ defmodule AshPagify.Components do
         on_paginate={@on_paginate}
         {@opts[:next_link_attrs]}
       >
-        <%= @opts[:next_link_content] %>
+        {@opts[:next_link_content]}
       </.pagination_link>
     </nav>
     """
@@ -480,7 +480,7 @@ defmodule AshPagify.Components do
       1
     </.pagination_link>
 
-    <span :if={@first > 2} {@opts[:ellipsis_attrs]}><%= @opts[:ellipsis_content] %></span>
+    <span :if={@first > 2} {@opts[:ellipsis_attrs]}>{@opts[:ellipsis_content]}</span>
 
     <.pagination_link
       :for={page <- @range}
@@ -490,11 +490,11 @@ defmodule AshPagify.Components do
       on_paginate={@on_paginate}
       {Pagination.attrs_for_page_link(page, @meta, @opts)}
     >
-      <%= page %>
+      {page}
     </.pagination_link>
 
     <span :if={@last < @meta.total_pages - 1} {@opts[:ellipsis_attrs]}>
-      <%= @opts[:ellipsis_content] %>
+      {@opts[:ellipsis_content]}
     </span>
 
     <.pagination_link
@@ -505,7 +505,7 @@ defmodule AshPagify.Components do
       on_paginate={@on_paginate}
       {Pagination.attrs_for_page_link(@meta.total_pages, @meta, @opts)}
     >
-      <%= @meta.total_pages %>
+      {@meta.total_pages}
     </.pagination_link>
     """
   end
@@ -530,7 +530,7 @@ defmodule AshPagify.Components do
 
     ~H"""
     <span {@rest} class={@disabled_class}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </span>
     """
   end
@@ -538,7 +538,7 @@ defmodule AshPagify.Components do
   defp pagination_link(%{on_paginate: nil, path: path} = assigns) when is_binary(path) do
     ~H"""
     <.link patch={@path} {@rest}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </.link>
     """
   end
@@ -552,7 +552,7 @@ defmodule AshPagify.Components do
       phx-value-offset={@offset}
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </.link>
     """
   end
@@ -861,7 +861,7 @@ defmodule AshPagify.Components do
       assign(assigns, :opts, Table.merge_opts(opts))
 
     ~H"""
-    <%= @opts[:error_content] %>
+    {@opts[:error_content]}
     """
   end
 
@@ -873,7 +873,7 @@ defmodule AshPagify.Components do
 
     ~H"""
     <%= if !@loading and empty?(@items) do %>
-      <%= @opts[:no_results_content] %>
+      {@opts[:no_results_content]}
     <% else %>
       <%= if @opts[:container] do %>
         <div id={@id <> "_container"} {@opts[:container_attrs]}>

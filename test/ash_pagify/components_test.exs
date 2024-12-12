@@ -49,10 +49,10 @@ defmodule AshPagify.ComponentsTest do
       loading={@loading}
       error={@error}
     >
-      <:col :let={post} label="Name" field={:name}><%= post.name %></:col>
-      <:col :let={post} label="Email" field={:email}><%= post.email %></:col>
-      <:col :let={post} label="Age"><%= post.age %></:col>
-      <:col :let={post} label="Species" field={:species}><%= post.species %></:col>
+      <:col :let={post} label="Name" field={:name}>{post.name}</:col>
+      <:col :let={post} label="Email" field={:email}>{post.email}</:col>
+      <:col :let={post} label="Age">{post.age}</:col>
+      <:col :let={post} label="Species" field={:species}>{post.species}</:col>
       <:col>column without label</:col>
     </AshPagify.Components.table>
     """)
@@ -1242,7 +1242,7 @@ defmodule AshPagify.ComponentsTest do
           row_item={@row_item}
           on_sort={JS.push("sort")}
         >
-          <:col :let={p}><%= p.name %></:col>
+          <:col :let={p}>{p.name}</:col>
         </AshPagify.Components.table>
         """)
 
@@ -1341,7 +1341,7 @@ defmodule AshPagify.ComponentsTest do
           meta={%AshPagify.Meta{ash_pagify: %AshPagify{}}}
           on_sort={%JS{}}
         >
-          <:col :let={u} label="Name"><%= u.name %></:col>
+          <:col :let={u} label="Name">{u.name}</:col>
           <:action label="Buttons" tbody_td_attrs={@attrs_fun}>some action</:action>
         </AshPagify.Components.table>
         """)
@@ -1380,10 +1380,10 @@ defmodule AshPagify.ComponentsTest do
           meta={%AshPagify.Meta{ash_pagify: %AshPagify{}}}
         >
           <:col :let={post} thead_th_attrs={[class: "name-header"]}>
-            <%= post.name %>
+            {post.name}
           </:col>
           <:col :let={post} thead_th_attrs={[class: "age-header"]}>
-            <%= post.age %>
+            {post.age}
           </:col>
           <:action :let={post} thead_th_attrs={[class: "action-header"]}>
             <.link navigate={"/show/post/#{post.name}"}>Show Post</.link>
@@ -1407,10 +1407,10 @@ defmodule AshPagify.ComponentsTest do
           meta={%AshPagify.Meta{ash_pagify: %AshPagify{}}}
         >
           <:col :let={post} tbody_td_attrs={[class: "name-column"]}>
-            <%= post.name %>
+            {post.name}
           </:col>
           <:col :let={post} tbody_td_attrs={[class: "age-column"]}>
-            <%= post.age %>
+            {post.age}
           </:col>
           <:action :let={post} tbody_td_attrs={[class: "action-column"]}>
             <.link navigate={"/show/post/#{post.name}"}>Show Post</.link>
@@ -1433,8 +1433,8 @@ defmodule AshPagify.ComponentsTest do
       html =
         parse_heex(~H"""
         <AshPagify.Components.table items={@items} meta={@meta} on_sort={%JS{}} opts={@opts}>
-          <:col :let={i} thead_th_attrs={[class: "name-th-class"]}><%= i.name %></:col>
-          <:col :let={i}><%= i.age %></:col>
+          <:col :let={i} thead_th_attrs={[class: "name-th-class"]}>{i.name}</:col>
+          <:col :let={i}>{i.age}</:col>
         </AshPagify.Components.table>
         """)
 
@@ -1456,9 +1456,9 @@ defmodule AshPagify.ComponentsTest do
         parse_heex(~H"""
         <AshPagify.Components.table items={@items} meta={@meta} on_sort={%JS{}} opts={@opts}>
           <:col :let={i} thead_th_attrs={[class: "name-th-class"]} class="name-th-col-class">
-            <%= i.name %>
+            {i.name}
           </:col>
-          <:col :let={i} class="name-th-col-class"><%= i.age %></:col>
+          <:col :let={i} class="name-th-col-class">{i.age}</:col>
         </AshPagify.Components.table>
         """)
 
@@ -1479,8 +1479,8 @@ defmodule AshPagify.ComponentsTest do
       html =
         parse_heex(~H"""
         <AshPagify.Components.table items={@items} meta={@meta} on_sort={%JS{}} opts={@opts}>
-          <:col :let={i} field={:name}><%= i.name %></:col>
-          <:col :let={i}><%= i.age %></:col>
+          <:col :let={i} field={:name}>{i.name}</:col>
+          <:col :let={i}>{i.age}</:col>
         </AshPagify.Components.table>
         """)
 
@@ -1499,9 +1499,9 @@ defmodule AshPagify.ComponentsTest do
         parse_heex(~H"""
         <AshPagify.Components.table items={@items} meta={@meta} on_sort={%JS{}} opts={@opts}>
           <:col :let={i} field={:name} th_wrapper_attrs={[class: "name-th-wrapper-class"]}>
-            <%= i.name %>
+            {i.name}
           </:col>
-          <:col :let={i} field={:age}><%= i.age %></:col>
+          <:col :let={i} field={:age}>{i.age}</:col>
         </AshPagify.Components.table>
         """)
 
@@ -1522,8 +1522,8 @@ defmodule AshPagify.ComponentsTest do
       html =
         parse_heex(~H"""
         <AshPagify.Components.table items={@items} meta={@meta} on_sort={%JS{}} opts={@opts}>
-          <:col :let={i} tbody_td_attrs={[class: "name-td-class"]}><%= i.name %></:col>
-          <:col :let={i}><%= i.age %></:col>
+          <:col :let={i} tbody_td_attrs={[class: "name-td-class"]}>{i.name}</:col>
+          <:col :let={i}>{i.age}</:col>
         </AshPagify.Components.table>
         """)
 
@@ -1545,9 +1545,9 @@ defmodule AshPagify.ComponentsTest do
         parse_heex(~H"""
         <AshPagify.Components.table items={@items} meta={@meta} on_sort={%JS{}} opts={@opts}>
           <:col :let={i} tbody_td_attrs={[class: "name-td-class"]} class="name-td-col-class">
-            <%= i.name %>
+            {i.name}
           </:col>
-          <:col :let={i} class="name-td-col-class"><%= i.age %></:col>
+          <:col :let={i} class="name-td-col-class">{i.age}</:col>
         </AshPagify.Components.table>
         """)
 
@@ -1568,7 +1568,7 @@ defmodule AshPagify.ComponentsTest do
       html =
         parse_heex(~H"""
         <AshPagify.Components.table items={@items} meta={@meta} on_sort={%JS{}} opts={@opts}>
-          <:col :let={i}><%= i.name %></:col>
+          <:col :let={i}>{i.name}</:col>
           <:action thead_th_attrs={[class: "action-1-th-class"]}>action 1</:action>
           <:action>action 2</:action>
         </AshPagify.Components.table>
@@ -1591,7 +1591,7 @@ defmodule AshPagify.ComponentsTest do
       html =
         parse_heex(~H"""
         <AshPagify.Components.table items={@items} meta={@meta} on_sort={%JS{}} opts={@opts}>
-          <:col :let={i}><%= i.name %></:col>
+          <:col :let={i}>{i.name}</:col>
           <:action thead_th_attrs={[class: "action-1-th-class"]} class="action-1-col-class">
             action 1
           </:action>
@@ -1616,7 +1616,7 @@ defmodule AshPagify.ComponentsTest do
       html =
         parse_heex(~H"""
         <AshPagify.Components.table items={@items} meta={@meta} on_sort={%JS{}} opts={@opts}>
-          <:col :let={i}><%= i.name %></:col>
+          <:col :let={i}>{i.name}</:col>
           <:action tbody_td_attrs={[class: "action-1-td-class"]}>action 1</:action>
           <:action>action 2</:action>
         </AshPagify.Components.table>
@@ -1639,7 +1639,7 @@ defmodule AshPagify.ComponentsTest do
       html =
         parse_heex(~H"""
         <AshPagify.Components.table items={@items} meta={@meta} on_sort={%JS{}} opts={@opts}>
-          <:col :let={i}><%= i.name %></:col>
+          <:col :let={i}>{i.name}</:col>
           <:action tbody_td_attrs={[class: "action-1-td-class"]} class="action-1-col-class">
             action 1
           </:action>
@@ -1797,7 +1797,7 @@ defmodule AshPagify.ComponentsTest do
         ~H"""
         <AshPagify.Components.table id="metrics-table" items={@items} meta={@meta} path="/navigations">
           <:col :let={navigation} label="TTFB" field={:ttfb} directions={@ttfb_directions}>
-            <%= navigation.ttfb %>
+            {navigation.ttfb}
           </:col>
         </AshPagify.Components.table>
         """
@@ -1853,10 +1853,10 @@ defmodule AshPagify.ComponentsTest do
           meta={%AshPagify.Meta{ash_pagify: %AshPagify{}}}
         >
           <:col :let={post}>
-            <%= post.name %>
+            {post.name}
           </:col>
           <:action :let={post} label={{:safe, "<span>Hello</span>"}}>
-            <%= post.name %>
+            {post.name}
           </:action>
         </AshPagify.Components.table>
         """)
@@ -1877,7 +1877,7 @@ defmodule AshPagify.ComponentsTest do
           meta={%AshPagify.Meta{ash_pagify: %AshPagify{}}}
         >
           <:col :let={post} label={{:safe, "<span>Hello</span>"}} field={:name}>
-            <%= post.name %>
+            {post.name}
           </:col>
         </AshPagify.Components.table>
         """)
@@ -2183,7 +2183,7 @@ defmodule AshPagify.ComponentsTest do
           meta={%AshPagify.Meta{ash_pagify: %AshPagify{}}}
           row_click={&JS.navigate("/show/#{&1.id}")}
         >
-          <:col :let={post} label="Name" field={:name}><%= post.name %></:col>
+          <:col :let={post} label="Name" field={:name}>{post.name}</:col>
           <:action :let={post}>
             <.link navigate={"/show/post/#{post.name}"}>Show Post</.link>
           </:action>
@@ -2266,7 +2266,7 @@ defmodule AshPagify.ComponentsTest do
           items={[%{name: "George"}]}
           meta={%AshPagify.Meta{ash_pagify: %AshPagify{}}}
         >
-          <:col :let={post} label="Name" field={:name}><%= post.name %></:col>
+          <:col :let={post} label="Name" field={:name}>{post.name}</:col>
           <:foot>
             <tr>
               <td>snap</td>
@@ -2297,13 +2297,13 @@ defmodule AshPagify.ComponentsTest do
           meta={%AshPagify.Meta{ash_pagify: %AshPagify{}}}
         >
           <:col :let={post} label="Name" field={:name} col_style="width: 60%;">
-            <%= post.name %>
+            {post.name}
           </:col>
           <:col :let={post} label="Surname" field={:surname}>
-            <%= post.surname %>
+            {post.surname}
           </:col>
           <:col :let={post} label="Age" field={:age} col_class="some-col-class">
-            <%= post.age %>
+            {post.age}
           </:col>
         </AshPagify.Components.table>
         """)
@@ -2333,8 +2333,8 @@ defmodule AshPagify.ComponentsTest do
           items={[%{name: "George", age: 8}]}
           meta={%AshPagify.Meta{ash_pagify: %AshPagify{}}}
         >
-          <:col :let={post} label="Name" field={:name}><%= post.name %></:col>
-          <:col :let={post} label="Age" field={:age}><%= post.age %></:col>
+          <:col :let={post} label="Name" field={:name}>{post.name}</:col>
+          <:col :let={post} label="Age" field={:age}>{post.age}</:col>
         </AshPagify.Components.table>
         """)
 
@@ -2359,7 +2359,7 @@ defmodule AshPagify.ComponentsTest do
           meta={%AshPagify.Meta{ash_pagify: %AshPagify{}}}
         >
           <:col :let={post} label="Name" field={:name} col_style="width: 60%;">
-            <%= post.name %>
+            {post.name}
           </:col>
           <:action :let={post} col_style="width: 40%;">
             <.link navigate={"/show/post/#{post.name}"}>

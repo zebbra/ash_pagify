@@ -66,9 +66,9 @@ defmodule AshPagify.Components.Table do
 
     ~H"""
     <table id={@id} {@opts[:table_attrs]}>
-      <caption :if={@caption_text}><%= @caption_text %></caption>
+      <caption :if={@caption_text}>{@caption_text}</caption>
       <caption :for={caption <- @caption}>
-        <%= render_slot(caption) %>
+        {render_slot(caption)}
       </caption>
       <.maybe_colgroup col={@col ++ @action} />
       <thead {@opts[:thead_attrs]}>
@@ -117,10 +117,10 @@ defmodule AshPagify.Components.Table do
               :if={show_column?(col)}
               {merge_td_attrs(@opts[:tbody_td_attrs], col, nil)}
             >
-              <%= @opts[:loading_content] %>
+              {@opts[:loading_content]}
             </td>
             <td :for={action <- @action} {merge_td_attrs(@opts[:tbody_td_attrs], action, nil)}>
-              <%= @opts[:loading_content] %>
+              {@opts[:loading_content]}
             </td>
           </tr>
         <% else %>
@@ -135,15 +135,15 @@ defmodule AshPagify.Components.Table do
               {merge_td_attrs(@opts[:tbody_td_attrs], col, item)}
               phx-click={@row_click && @row_click.(item)}
             >
-              <%= render_slot(col, @row_item.(item)) %>
+              {render_slot(col, @row_item.(item))}
             </td>
             <td :for={action <- @action} {merge_td_attrs(@opts[:tbody_td_attrs], action, item)}>
-              <%= render_slot(action, @row_item.(item)) %>
+              {render_slot(action, @row_item.(item))}
             </td>
           </tr>
         <% end %>
       </tbody>
-      <tfoot :if={@foot != []}><%= render_slot(@foot) %></tfoot>
+      <tfoot :if={@foot != []}>{render_slot(@foot)}</tfoot>
     </table>
     """
   end
@@ -258,7 +258,7 @@ defmodule AshPagify.Components.Table do
 
   defp header_column(%{sortable: false, th_wrapper_attrs: []} = assigns) do
     ~H"""
-    <th {@thead_th_attrs}><%= @label %></th>
+    <th {@thead_th_attrs}>{@label}</th>
     """
   end
 
@@ -266,7 +266,7 @@ defmodule AshPagify.Components.Table do
     ~H"""
     <th {@thead_th_attrs}>
       <span {@th_wrapper_attrs}>
-        <%= @label %>
+        {@label}
       </span>
     </th>
     """
@@ -274,7 +274,7 @@ defmodule AshPagify.Components.Table do
 
   defp header_column(%{sortable: false} = assigns) do
     ~H"""
-    <th {@thead_th_attrs}><%= @label %></th>
+    <th {@thead_th_attrs}>{@label}</th>
     """
   end
 
@@ -293,11 +293,11 @@ defmodule AshPagify.Components.Table do
   attr :rest, :global
 
   defp arrow(%{direction: direction} = assigns) when direction in [:asc, :asc_nils_first, :asc_nils_last] do
-    ~H"<span {@rest}><%= @symbol_asc %></span>"
+    ~H"<span {@rest}>{@symbol_asc}</span>"
   end
 
   defp arrow(%{direction: direction} = assigns) when direction in [:desc, :desc_nils_first, :desc_nils_last] do
-    ~H"<span {@rest}><%= @symbol_desc %></span>"
+    ~H"<span {@rest}>{@symbol_desc}</span>"
   end
 
   defp arrow(%{direction: nil, symbol_unsorted: nil} = assigns) do
@@ -305,7 +305,7 @@ defmodule AshPagify.Components.Table do
   end
 
   defp arrow(%{direction: nil} = assigns) do
-    ~H"<span {@rest}><%= @symbol_unsorted %></span>"
+    ~H"<span {@rest}>{@symbol_unsorted}</span>"
   end
 
   attr :field, :atom, required: true
@@ -316,14 +316,14 @@ defmodule AshPagify.Components.Table do
 
   defp sort_link(%{on_sort: nil, path: path} = assigns) when is_binary(path) do
     ~H"""
-    <.link patch={@path}><%= @label %></.link>
+    <.link patch={@path}>{@label}</.link>
     """
   end
 
   defp sort_link(%{} = assigns) do
     ~H"""
     <.link patch={@path} phx-click={@on_sort} phx-target={@target} phx-value-order={@field}>
-      <%= @label %>
+      {@label}
     </.link>
     """
   end
