@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v1.3.0](https://github.com/zebbra/ash_pagify/compare/v1.2.2...v1.3.0) (2025-01-06)
+
+
+
+
+### Features:
+
+* deps: update filter_form to new standard
+
 ## [v1.2.2](https://github.com/zebbra/ash_pagify/compare/v1.2.1...v1.2.2) (2024-12-12)
 
 
