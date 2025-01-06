@@ -506,7 +506,7 @@ defmodule AshPagify.FilterForm do
           |> errors()
           |> Enum.map(fn
             {key, message, vars} ->
-              "#{key}: #{AshPhoenix.replace_vars(message, vars)}"
+              "#{key}: #{replace_vars(message, vars)}"
 
             other ->
               other
@@ -518,6 +518,12 @@ defmodule AshPagify.FilterForm do
       {:error, error} ->
         raise Ash.Error.to_error_class(error)
     end
+  end
+
+  defp replace_vars(message, vars) do
+    Enum.reduce(vars || [], message, fn {key, value}, acc ->
+      String.replace(acc, "%{#{key}}", to_string(value))
+    end)
   end
 
   @deprecated "Use to_filter_expression!/1 instead"
@@ -1054,7 +1060,7 @@ defmodule AshPagify.FilterForm do
     |> Enum.concat(Ash.Filter.builtin_functions())
     |> Enum.filter(fn function ->
       try do
-        struct(function).__predicate__? && Enum.any?(function.args, &match?([_, _], &1))
+        struct(function).__predicate__?() && Enum.any?(function.args, &match?([_, _], &1))
       rescue
         _ -> false
       end
