@@ -121,7 +121,7 @@ defmodule AshPagify.MixProject do
       {:git_hooks, "~> 0.7.3", only: [:dev], runtime: false},
 
       # Documentation
-      {:ex_doc, "~> 0.35.1", runtime: false}
+      {:ex_doc, "~> 0.36.1", runtime: false}
     ]
   end
 
