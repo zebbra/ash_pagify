@@ -118,7 +118,7 @@ defmodule AshPagify.MixProject do
       {:floki, ">= 0.36.0", only: :test},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
       {:git_ops, "~> 2.6.1", only: [:dev]},
-      {:git_hooks, "~> 0.7.3", only: [:dev], runtime: false},
+      {:git_hooks, "~> 0.8.0", only: [:dev], runtime: false},
 
       # Documentation
       {:ex_doc, "~> 0.35.1", runtime: false}
