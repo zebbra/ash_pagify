@@ -120,6 +120,9 @@ defmodule AshPagify.MixProject do
       {:git_ops, "~> 2.6.1", only: [:dev]},
       {:git_hooks, "~> 0.8.0", only: [:dev], runtime: false},
 
+      # Misc
+      {:sourceror, "~> 1.7", only: [:dev, :test]},
+
       # Documentation
       {:ex_doc, "~> 0.36.1", runtime: false}
     ]
