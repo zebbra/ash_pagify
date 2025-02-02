@@ -1496,7 +1496,7 @@ defmodule AshPagify do
   def reset_filter_form(%AshPagify{} = ash_pagify), do: %{ash_pagify | filter_form: %{}}
 
   @doc """
-  Updates the filter form of a AshPagify.Meta struct.
+  Updates the filter form of a AshPagify struct.
 
   If the filter already exists, it will be replaced with the new value. If the
   filter does not exist, it will be added to the filter form map.
@@ -1504,27 +1504,25 @@ defmodule AshPagify do
   If the reset option is set to false, the offset will not be reset to 0.
 
   ## Examples
-      iex>  set_filter_form(%AshPagify.Meta{}, %{"field" => "name", "operator" => "eq", "value" => "Post 2"})
-      %AshPagify.Meta{ash_pagify: %AshPagify{filter_form: %{"field" => "name", "operator" => "eq", "value" => "Post 2"}}}
+      iex>  set_filter_form(%AshPagify{}, %{"field" => "name", "operator" => "eq", "value" => "Post 2"})
+      %AshPagify{filter_form: %{"field" => "name", "operator" => "eq", "value" => "Post 2"}}
 
-      iex> set_filter_form(%AshPagify.Meta{ash_pagify: %AshPagify{filter_form: %{"field" => "name", "operator" => "eq", "value" => "Post 1"}}}, %{"field" => "name", "operator" => "eq", "value" => "Post 2"})
-      %AshPagify.Meta{ash_pagify: %AshPagify{filter_form: %{"field" => "name", "operator" => "eq", "value" => "Post 2"}}}
+      iex> set_filter_form(%AshPagify{filter_form: %{"field" => "name", "operator" => "eq", "value" => "Post 1"}}, %{"field" => "name", "operator" => "eq", "value" => "Post 2"})
+      %AshPagify{filter_form: %{"field" => "name", "operator" => "eq", "value" => "Post 2"}}
 
-      iex> set_filter_form(%AshPagify.Meta{ash_pagify: %AshPagify{filter_form: %{"field" => "name", "operator" => "eq", "value" => "Post 1"}}}, %{"negated" => false, "operator" => "and"})
-      %AshPagify.Meta{ash_pagify: %AshPagify{filter_form: nil}}
+      iex> set_filter_form(%AshPagify{filter_form: %{"field" => "name", "operator" => "eq", "value" => "Post 1"}}, %{"negated" => false, "operator" => "and"})
+      %AshPagify{filter_form: nil}
   """
-  @spec set_filter_form(Meta.t(), map(), Keyword.t()) :: Meta.t()
-  def set_filter_form(meta, filter_form, opts \\ [])
+  @spec set_filter_form(AshPagify.t(), map(), Keyword.t()) :: Meta.t()
+  def set_filter_form(ash_pagify, filter_form, opts \\ [])
 
-  def set_filter_form(%Meta{ash_pagify: ash_pagify} = meta, filter_form, opts)
+  def set_filter_form(%AshPagify{} = ash_pagify, filter_form, opts)
       when filter_form == %{"negated" => false, "operator" => "and"} do
-    ash_pagify = maybe_reset_offset(%{ash_pagify | filter_form: nil}, opts)
-    %{meta | ash_pagify: ash_pagify}
+    maybe_reset_offset(%{ash_pagify | filter_form: nil}, opts)
   end
 
-  def set_filter_form(%Meta{ash_pagify: ash_pagify} = meta, filter_form, opts) do
-    ash_pagify = maybe_reset_offset(%{ash_pagify | filter_form: filter_form}, opts)
-    %{meta | ash_pagify: ash_pagify}
+  def set_filter_form(%AshPagify{} = ash_pagify, filter_form, opts) do
+    maybe_reset_offset(%{ash_pagify | filter_form: filter_form}, opts)
   end
 
   defp maybe_reset_offset(%AshPagify{} = ash_pagify, opts) do
