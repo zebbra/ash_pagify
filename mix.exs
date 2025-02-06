@@ -124,7 +124,7 @@ defmodule AshPagify.MixProject do
       {:sourceror, "~> 1.7", only: [:dev, :test]},
 
       # Documentation
-      {:ex_doc, "~> 0.36.1", runtime: false}
+      {:ex_doc, "~> 0.37.0", runtime: false}
     ]
   end
 
