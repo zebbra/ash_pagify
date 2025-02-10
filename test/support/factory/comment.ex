@@ -64,7 +64,6 @@ defmodule AshPagify.Factory.Comment do
 
     read :read do
       primary? true
-      argument :sort, :string, allow_nil?: true
       pagination offset?: true, countable: true, required?: false
     end
 

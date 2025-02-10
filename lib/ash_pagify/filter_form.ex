@@ -1412,7 +1412,7 @@ defmodule AshPagify.FilterForm do
   defp set_filter_form(meta, filter_form_params, reset) do
     params = if reset, do: %{}, else: filter_form_params
 
-    AshPagify.set_filter_form(meta, params)
+    Meta.set_filter_form(meta, params)
   end
 
   @doc """

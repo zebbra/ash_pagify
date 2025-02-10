@@ -1513,7 +1513,7 @@ defmodule AshPagify do
       iex> set_filter_form(%AshPagify{filter_form: %{"field" => "name", "operator" => "eq", "value" => "Post 1"}}, %{"negated" => false, "operator" => "and"})
       %AshPagify{filter_form: nil}
   """
-  @spec set_filter_form(AshPagify.t(), map(), Keyword.t()) :: Meta.t()
+  @spec set_filter_form(AshPagify.t(), map(), Keyword.t()) :: AshPagify.t()
   def set_filter_form(ash_pagify, filter_form, opts \\ [])
 
   def set_filter_form(%AshPagify{} = ash_pagify, filter_form, opts)
