@@ -5,6 +5,23 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v1.4.0](https://github.com/zebbra/ash_pagify/compare/v1.3.0...v1.4.0) (2025-02-10)
+
+
+
+
+### Features:
+
+* meta: add set_filter_form function to update filter_form in Meta.ash_pagify
+
+### Bug Fixes:
+
+* set_filter_form: use from Meta module
+
+* make AshPagify.set_filter_form/3 be in sync with the documentation.
+
+* deps: remove unused
+
 ## [v1.3.0](https://github.com/zebbra/ash_pagify/compare/v1.2.2...v1.3.0) (2025-01-06)
 
 
