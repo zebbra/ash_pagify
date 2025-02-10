@@ -4,7 +4,6 @@ defmodule AshPagify.Meta do
   """
 
   alias AshPagify.Meta
-  alias AshPagify.Misc
 
   defstruct current_limit: nil,
             current_offset: nil,
@@ -127,26 +126,8 @@ defmodule AshPagify.Meta do
       %AshPagify.Meta{ash_pagify: %AshPagify{filter_form: nil}}
   """
   @spec set_filter_form(Meta.t(), map(), Keyword.t()) :: Meta.t()
-  def set_filter_form(meta, filter_form, opts \\ [])
-
-  def set_filter_form(%Meta{ash_pagify: ash_pagify} = meta, filter_form, opts)
-      when filter_form == %{"negated" => false, "operator" => "and"} do
-    ash_pagify = maybe_reset_offset(%{ash_pagify | filter_form: nil}, opts)
+  def set_filter_form(%Meta{ash_pagify: ash_pagify} = meta, filter_form, opts \\ []) do
+    ash_pagify = AshPagify.set_filter_form(ash_pagify, filter_form, opts)
     %{meta | ash_pagify: ash_pagify}
-  end
-
-  def set_filter_form(%Meta{ash_pagify: ash_pagify} = meta, filter_form, opts) do
-    ash_pagify = maybe_reset_offset(%{ash_pagify | filter_form: filter_form}, opts)
-    %{meta | ash_pagify: ash_pagify}
-  end
-
-  defp maybe_reset_offset(%AshPagify{} = ash_pagify, opts) do
-    reset_on_filter = Misc.get_option(:reset_on_filter?, opts, true)
-
-    if reset_on_filter do
-      %{ash_pagify | offset: nil}
-    else
-      ash_pagify
-    end
   end
 end

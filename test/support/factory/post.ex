@@ -85,7 +85,6 @@ defmodule AshPagify.Factory.Post do
 
     read :read do
       primary? true
-      argument :sort, :string, allow_nil?: true
 
       pagination offset?: true,
                  default_limit: @ash_pagify_options.default_limit,
