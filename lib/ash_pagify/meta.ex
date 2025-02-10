@@ -3,6 +3,9 @@ defmodule AshPagify.Meta do
   Defines a struct for holding meta information of a query result.
   """
 
+  alias AshPagify.Meta
+  alias AshPagify.Misc
+
   defstruct current_limit: nil,
             current_offset: nil,
             current_page: nil,
@@ -103,5 +106,47 @@ defmodule AshPagify.Meta do
       opts: opts,
       params: params
     }
+  end
+
+  @doc """
+  Updates the filter form of a AshPagify.Meta struct.
+
+  If the filter already exists, it will be replaced with the new value. If the
+  filter does not exist, it will be added to the filter form map.
+
+  If the reset option is set to false, the offset will not be reset to 0.
+
+  ## Examples
+      iex>  set_filter_form(%AshPagify.Meta{}, %{"field" => "name", "operator" => "eq", "value" => "Post 2"})
+      %AshPagify.Meta{ash_pagify: %AshPagify{filter_form: %{"field" => "name", "operator" => "eq", "value" => "Post 2"}}}
+
+      iex> set_filter_form(%AshPagify.Meta{ash_pagify: %AshPagify{filter_form: %{"field" => "name", "operator" => "eq", "value" => "Post 1"}}}, %{"field" => "name", "operator" => "eq", "value" => "Post 2"})
+      %AshPagify.Meta{ash_pagify: %AshPagify{filter_form: %{"field" => "name", "operator" => "eq", "value" => "Post 2"}}}
+
+      iex> set_filter_form(%AshPagify.Meta{ash_pagify: %AshPagify{filter_form: %{"field" => "name", "operator" => "eq", "value" => "Post 1"}}}, %{"negated" => false, "operator" => "and"})
+      %AshPagify.Meta{ash_pagify: %AshPagify{filter_form: nil}}
+  """
+  @spec set_filter_form(Meta.t(), map(), Keyword.t()) :: Meta.t()
+  def set_filter_form(meta, filter_form, opts \\ [])
+
+  def set_filter_form(%Meta{ash_pagify: ash_pagify} = meta, filter_form, opts)
+      when filter_form == %{"negated" => false, "operator" => "and"} do
+    ash_pagify = maybe_reset_offset(%{ash_pagify | filter_form: nil}, opts)
+    %{meta | ash_pagify: ash_pagify}
+  end
+
+  def set_filter_form(%Meta{ash_pagify: ash_pagify} = meta, filter_form, opts) do
+    ash_pagify = maybe_reset_offset(%{ash_pagify | filter_form: filter_form}, opts)
+    %{meta | ash_pagify: ash_pagify}
+  end
+
+  defp maybe_reset_offset(%AshPagify{} = ash_pagify, opts) do
+    reset_on_filter = Misc.get_option(:reset_on_filter?, opts, true)
+
+    if reset_on_filter do
+      %{ash_pagify | offset: nil}
+    else
+      ash_pagify
+    end
   end
 end
