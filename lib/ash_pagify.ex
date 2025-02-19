@@ -163,7 +163,7 @@ defmodule AshPagify do
       iex> page
       {:page, [count: true, offset: 20, limit: 10]}
       iex> query
-      #Ash.Query<resource: AshPagify.Factory.Post, filter: #Ash.Filter<name == "foo">, sort: [{"name", :asc}]>
+      #Ash.Query<resource: AshPagify.Factory.Post, filter: #Ash.Filter<name == "foo">, sort: [name: :asc]>
 
   Or to disable counting:
 
@@ -173,7 +173,7 @@ defmodule AshPagify do
       iex> page
       {:page, [count: false, offset: 20, limit: 10]}
       iex> query
-      #Ash.Query<resource: AshPagify.Factory.Post, filter: #Ash.Filter<name == "foo">, sort: [{"name", :asc}]>
+      #Ash.Query<resource: AshPagify.Factory.Post, filter: #Ash.Filter<name == "foo">, sort: [name: :asc]>
 
   Sorting only:
 
@@ -183,7 +183,7 @@ defmodule AshPagify do
       iex> page
       {:page, [count: true, offset: 0, limit: 15]}
       iex> query
-      #Ash.Query<resource: AshPagify.Factory.Post, sort: [{"name", :asc}]>
+      #Ash.Query<resource: AshPagify.Factory.Post, sort: [name: :asc]>
 
   Filtering only:
 
@@ -685,7 +685,7 @@ defmodule AshPagify do
       iex> q = Ash.Query.new(Post)
       iex> ash_pagify = %AshPagify{filters: %{name: "John"}, order_by: ["name"]}
       iex> query(q, ash_pagify)
-      #Ash.Query<resource: AshPagify.Factory.Post, filter: #Ash.Filter<name == "John">, sort: [{"name", :asc}]>
+      #Ash.Query<resource: AshPagify.Factory.Post, filter: #Ash.Filter<name == "John">, sort: [name: :asc]>
   """
   @spec query(Ash.Query.t(), AshPagify.t(), Keyword.t()) :: Ash.Query.t()
   def query(%Ash.Query{} = q, %AshPagify{} = ash_pagify, opts \\ []) do
@@ -904,7 +904,7 @@ defmodule AshPagify do
         iex> q = Ash.Query.new(Post)
         iex> ash_pagify = %AshPagify{order_by: ["name"]}
         iex> order_by(q, ash_pagify)
-        #Ash.Query<resource: AshPagify.Factory.Post, sort: [{"name", :asc}]>
+        #Ash.Query<resource: AshPagify.Factory.Post, sort: [name: :asc]>
 
   Or descending order nulls last:
         iex> alias AshPagify.Factory.Post
@@ -918,7 +918,7 @@ defmodule AshPagify do
         iex> q = Ash.Query.new(Post)
         iex> ash_pagify = %AshPagify{order_by: ["name", "id"]}
         iex> order_by(q, ash_pagify)
-        #Ash.Query<resource: AshPagify.Factory.Post, sort: [{"name", :asc}, {"id", :asc}]>
+        #Ash.Query<resource: AshPagify.Factory.Post, sort: [name: :asc, id: :asc]>
 
   Or by calculation:
         iex> alias AshPagify.Factory.Post

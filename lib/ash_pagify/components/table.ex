@@ -334,8 +334,8 @@ defmodule AshPagify.Components.Table do
   defp sortable?(nil, _), do: false
   defp sortable?(_, nil), do: true
 
-  defp sortable?(field, resoruce) do
-    Ash.Resource.Info.sortable?(resoruce, field)
+  defp sortable?(field, resource) do
+    Ash.Resource.Info.sortable?(resource, field)
   end
 
   defp build_path(nil, _, _, _), do: nil
