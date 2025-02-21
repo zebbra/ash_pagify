@@ -2072,7 +2072,7 @@ defmodule AshPagify do
 
     order_by = limit_order_by(order_by, opts)
 
-    %AshPagify{ash_pagify | order_by: order_by}
+    %{ash_pagify | order_by: order_by}
   end
 
   def push_order(ash_pagify, field, opts) when is_binary(field) do
