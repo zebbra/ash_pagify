@@ -284,6 +284,14 @@ defmodule AshPagify.FilterForm do
       """,
       default: true
     ],
+    parent_index: [
+      type: :string,
+      doc: """
+      The index of the parent filter_form that this component or filter_form is being added to.
+
+      This is used internally and should not be set manually.
+      """
+    ],
     initial_form: [
       type: :any,
       doc: """
@@ -352,6 +360,7 @@ defmodule AshPagify.FilterForm do
       | components:
           parse_components(form, params["components"],
             remove_empty_groups?: opts[:remove_empty_groups?],
+            parent_index: opts[:parent_index],
             root?: opts[:root?]
           )
     })
@@ -751,13 +760,13 @@ defmodule AshPagify.FilterForm do
   defp parse_components(parent, component_params, form_opts) do
     component_params
     |> Kernel.||(%{})
-    |> Enum.sort_by(fn {key, _value} ->
-      String.to_integer(key)
+    |> Enum.sort_by(fn {index, _value} ->
+      String.to_integer(index)
     end)
     |> Enum.map(&parse_component(parent, &1, form_opts))
   end
 
-  defp parse_component(parent, {key, params}, form_opts) do
+  defp parse_component(parent, {index, params}, form_opts) do
     if predicate?(params) do
       # Eventually, components may have references w/ paths
       # also, we should validate references here
@@ -769,19 +778,20 @@ defmodule AshPagify.FilterForm do
         parent.resource,
         Keyword.merge(form_opts,
           params: params,
-          as: form_name(parent.name, key, form_opts[:root?]),
+          as: form_name(parent.name, form_opts[:parent_index] || index, form_opts[:root?]),
           key: params["key"],
+          parent_index: index,
           root?: false
         )
       )
     end
   end
 
-  defp form_name(name, key, root?) do
+  defp form_name(name, index, root?) do
     if root? do
       name
     else
-      name <> "[components][#{key}]"
+      name <> "[components][#{index}]"
     end
   end
 
@@ -867,13 +877,13 @@ defmodule AshPagify.FilterForm do
     form_without_components = %{form | components: []}
 
     component_params
-    |> Enum.sort_by(fn {key, _} ->
-      String.to_integer(key)
+    |> Enum.sort_by(fn {index, _} ->
+      String.to_integer(index)
     end)
     |> Enum.map(&validate_component(form_without_components, &1, form.components, opts))
   end
 
-  defp validate_component(form, {key, params}, current_components, opts) do
+  defp validate_component(form, {index, params}, current_components, opts) do
     reset_on_change? = Keyword.get(opts, :reset_on_change?, true)
 
     id = params[:id] || params["id"]
@@ -897,8 +907,9 @@ defmodule AshPagify.FilterForm do
 
         new(form.resource,
           params: params,
-          as: form_name(form.name, key, opts[:root?]),
+          as: form_name(form.name, opts[:parent_index] || index, opts[:root?]),
           remove_empty_groups?: form.remove_empty_groups?,
+          parent_index: index,
           root?: false
         )
       end
@@ -1230,6 +1241,16 @@ defmodule AshPagify.FilterForm do
             update_group(component, key, func, false)
           end)
     })
+  end
+
+  def update_group(%__MODULE__{} = form, key, func, false) do
+    %{
+      form
+      | components:
+          Enum.map(form.components, fn component ->
+            update_group(component, key, func, false)
+          end)
+    }
   end
 
   def update_group(%Predicate{} = predicate, _key, _func, _root), do: predicate
