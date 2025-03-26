@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v1.4.2](https://github.com/zebbra/ash_pagify/compare/v1.4.1...v1.4.2) (2025-03-26)
+
+
+
+
+### Bug Fixes:
+
+* filter_form: handle nested groups
+
 ## [v1.4.1](https://github.com/zebbra/ash_pagify/compare/v1.4.0...v1.4.1) (2025-02-21)
 
 
