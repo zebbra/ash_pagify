@@ -111,7 +111,7 @@ defmodule AshPagify.MixProject do
       {:credo, "~> 1.7.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4.3", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1.4", only: [:dev, :test], runtime: false},
-      {:assertions, "~> 0.20.1", only: :test},
+      {:assertions, "~> 0.21.0", only: :test},
       {:styler, "~> 1.1", only: [:dev, :test], runtime: false},
       {:junit_formatter, "~> 3.3", only: :test},
       {:ex_machina, "~> 2.8.0", only: :test},
