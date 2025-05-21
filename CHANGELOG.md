@@ -5,6 +5,11 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v1.4.3](https://github.com/zebbra/ash_pagify/compare/v1.4.2...v1.4.3) (2025-05-21)
+
+
+
+
 ## [v1.4.2](https://github.com/zebbra/ash_pagify/compare/v1.4.1...v1.4.2) (2025-03-26)
 
 
