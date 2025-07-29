@@ -263,7 +263,7 @@ defmodule AshPagifyTest do
     test "uses default resource order_by if no order_by is provided" do
       ash_pagify = %AshPagify{}
       query = Ash.Query.new(Post)
-      assert AshPagify.query(query, ash_pagify) == %Ash.Query{resource: AshPagify.Factory.Post}
+      assert AshPagify.query(query, ash_pagify) == %Ash.Query{resource: Post}
     end
 
     test "applies ts_rank order if search is provided and no order_by is provided" do
@@ -275,7 +275,7 @@ defmodule AshPagifyTest do
       tsquery_expr = Ash.Expr.expr(tsquery(search: ^tsquery_str))
 
       assert AshPagify.query(query, ash_pagify) == %Ash.Query{
-               resource: AshPagify.Factory.Post,
+               resource: Post,
                filter:
                  Ash.Query.filter(
                    Post,
@@ -297,7 +297,7 @@ defmodule AshPagifyTest do
       tsquery_expr = Ash.Expr.expr(tsquery(search: ^tsquery_str))
 
       assert AshPagify.query(query, ash_pagify) == %Ash.Query{
-               resource: AshPagify.Factory.Post,
+               resource: Post,
                filter:
                  Ash.Query.filter(
                    Post,
@@ -644,7 +644,7 @@ defmodule AshPagifyTest do
       ash_pagify = %{limit: 1, offset: 0, order_by: :name, filters: %{"name" => "Post 2"}}
 
       assert {[%Post{}],
-              %AshPagify.Meta{
+              %Meta{
                 current_limit: 1,
                 current_offset: 0,
                 current_page: 1,

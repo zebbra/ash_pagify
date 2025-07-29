@@ -1138,7 +1138,7 @@ defmodule AshPagify.ComponentsTest do
 
     test "sets default ID based on resource module" do
       assigns = %{
-        meta: %AshPagify.Meta{ash_pagify: %AshPagify{}, resource: Post},
+        meta: %Meta{ash_pagify: %AshPagify{}, resource: Post},
         items: ["George"]
       }
 
@@ -1175,7 +1175,7 @@ defmodule AshPagify.ComponentsTest do
 
     test "does not set row ID if items are not a stream" do
       assigns = %{
-        meta: %AshPagify.Meta{ash_pagify: %AshPagify{}, resource: Post},
+        meta: %Meta{ash_pagify: %AshPagify{}, resource: Post},
         items: ["George"]
       }
 
@@ -1192,7 +1192,7 @@ defmodule AshPagify.ComponentsTest do
 
     test "allows to set row ID function" do
       assigns = %{
-        meta: %AshPagify.Meta{ash_pagify: %AshPagify{}, resource: Post},
+        meta: %Meta{ash_pagify: %AshPagify{}, resource: Post},
         items: [%Post{id: 1, name: "George"}, %Post{id: 2, name: "Mary"}],
         row_id: &"posts-#{&1.name}"
       }
@@ -1211,7 +1211,7 @@ defmodule AshPagify.ComponentsTest do
 
     test "uses default row ID function if items are a stream" do
       assigns = %{
-        meta: %AshPagify.Meta{ash_pagify: %AshPagify{}, resource: Post},
+        meta: %Meta{ash_pagify: %AshPagify{}, resource: Post},
         stream: LiveStream.new(:posts, 0, [%Post{id: 1}, %Post{id: 2}], [])
       }
 
@@ -1229,7 +1229,7 @@ defmodule AshPagify.ComponentsTest do
 
     test "allows to override default row item function" do
       assigns = %{
-        meta: %AshPagify.Meta{ash_pagify: %AshPagify{}, resource: Post},
+        meta: %Meta{ash_pagify: %AshPagify{}, resource: Post},
         items: [%Post{name: "George"}],
         row_item: fn item -> Map.update!(item, :name, &String.upcase/1) end
       }
@@ -1425,7 +1425,7 @@ defmodule AshPagify.ComponentsTest do
 
     test "overrides table_th_attrs with thead_th_attrs in col" do
       assigns = %{
-        meta: %AshPagify.Meta{ash_pagify: %AshPagify{}, resource: Post},
+        meta: %Meta{ash_pagify: %AshPagify{}, resource: Post},
         items: [%{name: "George", age: 8}],
         opts: [thead_th_attrs: [class: "default-th-class"]]
       }
@@ -1447,7 +1447,7 @@ defmodule AshPagify.ComponentsTest do
 
     test "merges table_th_attrs with class from col" do
       assigns = %{
-        meta: %AshPagify.Meta{ash_pagify: %AshPagify{}, resource: Post},
+        meta: %Meta{ash_pagify: %AshPagify{}, resource: Post},
         items: [%{name: "George", age: 8}],
         opts: [thead_th_attrs: [class: "default-th-class"]]
       }
@@ -1471,7 +1471,7 @@ defmodule AshPagify.ComponentsTest do
 
     test "evaluates table th_wrapper_attrs" do
       assigns = %{
-        meta: %AshPagify.Meta{ash_pagify: %AshPagify{}, resource: Post},
+        meta: %Meta{ash_pagify: %AshPagify{}, resource: Post},
         items: [%{name: "George", age: 8}],
         opts: [th_wrapper_attrs: [class: "default-th-wrapper-class"]]
       }
@@ -1490,7 +1490,7 @@ defmodule AshPagify.ComponentsTest do
 
     test "overrides th_wrapper_attrs" do
       assigns = %{
-        meta: %AshPagify.Meta{ash_pagify: %AshPagify{}, resource: Post},
+        meta: %Meta{ash_pagify: %AshPagify{}, resource: Post},
         items: [%{name: "George", age: 8}],
         opts: [th_wrapper_attrs: [class: "default-th-wrapper-class"]]
       }
@@ -1514,7 +1514,7 @@ defmodule AshPagify.ComponentsTest do
 
     test "overrides table_td_attrs with tbody_td_attrs in col" do
       assigns = %{
-        meta: %AshPagify.Meta{ash_pagify: %AshPagify{}, resource: Post},
+        meta: %Meta{ash_pagify: %AshPagify{}, resource: Post},
         items: [%{name: "George", age: 8}],
         opts: [tbody_td_attrs: [class: "default-td-class"]]
       }
@@ -1536,7 +1536,7 @@ defmodule AshPagify.ComponentsTest do
 
     test "merges table_td_attrs with class from col" do
       assigns = %{
-        meta: %AshPagify.Meta{ash_pagify: %AshPagify{}, resource: Post},
+        meta: %Meta{ash_pagify: %AshPagify{}, resource: Post},
         items: [%{name: "George", age: 8}],
         opts: [tbody_td_attrs: [class: "default-td-class"]]
       }
@@ -1560,7 +1560,7 @@ defmodule AshPagify.ComponentsTest do
 
     test "overrides table_th_attrs with thead_th_attrs in action columns" do
       assigns = %{
-        meta: %AshPagify.Meta{ash_pagify: %AshPagify{}, resource: Post},
+        meta: %Meta{ash_pagify: %AshPagify{}, resource: Post},
         items: [%{name: "George", age: 8}],
         opts: [thead_th_attrs: [class: "default-th-class"]]
       }
@@ -1583,7 +1583,7 @@ defmodule AshPagify.ComponentsTest do
 
     test "merges table_th_attrs with class in action columns" do
       assigns = %{
-        meta: %AshPagify.Meta{ash_pagify: %AshPagify{}, resource: Post},
+        meta: %Meta{ash_pagify: %AshPagify{}, resource: Post},
         items: [%{name: "George", age: 8}],
         opts: [thead_th_attrs: [class: "default-th-class"]]
       }
@@ -1608,7 +1608,7 @@ defmodule AshPagify.ComponentsTest do
 
     test "overrides table_td_attrs with tbody_td_attrs in action columns" do
       assigns = %{
-        meta: %AshPagify.Meta{ash_pagify: %AshPagify{}, resource: Post},
+        meta: %Meta{ash_pagify: %AshPagify{}, resource: Post},
         items: [%{name: "George", age: 8}],
         opts: [tbody_td_attrs: [class: "default-td-class"]]
       }
@@ -1631,7 +1631,7 @@ defmodule AshPagify.ComponentsTest do
 
     test "merges table_td_attrs with class in action columns" do
       assigns = %{
-        meta: %AshPagify.Meta{ash_pagify: %AshPagify{}, resource: Post},
+        meta: %Meta{ash_pagify: %AshPagify{}, resource: Post},
         items: [%{name: "George", age: 8}],
         opts: [tbody_td_attrs: [class: "default-td-class"]]
       }
@@ -1659,7 +1659,7 @@ defmodule AshPagify.ComponentsTest do
     end
 
     test "displays headers for action col" do
-      assigns = %{meta: %AshPagify.Meta{ash_pagify: %AshPagify{}}}
+      assigns = %{meta: %Meta{ash_pagify: %AshPagify{}}}
 
       html =
         parse_heex(~H"""
@@ -1692,7 +1692,7 @@ defmodule AshPagify.ComponentsTest do
     end
 
     test "conditionally hides an action column" do
-      assigns = %{meta: %AshPagify.Meta{ash_pagify: %AshPagify{}}}
+      assigns = %{meta: %Meta{ash_pagify: %AshPagify{}}}
 
       html =
         parse_heex(~H"""
@@ -1774,7 +1774,7 @@ defmodule AshPagify.ComponentsTest do
 
     test "application of custom sort directions per column" do
       assigns = %{
-        meta: %AshPagify.Meta{
+        meta: %Meta{
           ash_pagify: %AshPagify{
             order_by: [ttfb: :desc_nils_last]
           }
@@ -1889,7 +1889,7 @@ defmodule AshPagify.ComponentsTest do
     test "adds aria-sort attribute only to first ordered field" do
       html =
         render_table(%{
-          meta: %AshPagify.Meta{
+          meta: %Meta{
             ash_pagify: %AshPagify{
               order_by: [email: :asc, name: :desc]
             }
@@ -1904,7 +1904,7 @@ defmodule AshPagify.ComponentsTest do
 
       html =
         render_table(%{
-          meta: %AshPagify.Meta{
+          meta: %Meta{
             ash_pagify: %AshPagify{
               order_by: [name: :desc, email: :asc]
             }
@@ -1919,7 +1919,7 @@ defmodule AshPagify.ComponentsTest do
 
       html =
         render_table(%{
-          meta: %AshPagify.Meta{
+          meta: %Meta{
             ash_pagify: %AshPagify{order_by: []}
           }
         })
@@ -1966,7 +1966,7 @@ defmodule AshPagify.ComponentsTest do
       assert find_one(html, "a:fl-contains('Species')")
 
       # with :for assign
-      html = render_table(%{meta: %AshPagify.Meta{ash_pagify: %AshPagify{}, resource: Post}})
+      html = render_table(%{meta: %Meta{ash_pagify: %AshPagify{}, resource: Post}})
 
       assert find_one(html, "a:fl-contains('Name')")
       assert [] = Floki.find(html, "a:fl-contains('Species')")
@@ -1996,7 +1996,7 @@ defmodule AshPagify.ComponentsTest do
     test "renders order direction symbol" do
       html =
         render_table(%{
-          meta: %AshPagify.Meta{
+          meta: %Meta{
             ash_pagify: %AshPagify{order_by: [name: :asc]}
           }
         })
@@ -2008,7 +2008,7 @@ defmodule AshPagify.ComponentsTest do
 
       html =
         render_table(%{
-          meta: %AshPagify.Meta{
+          meta: %Meta{
             ash_pagify: %AshPagify{order_by: [email: :asc]}
           }
         })
@@ -2023,7 +2023,7 @@ defmodule AshPagify.ComponentsTest do
 
       html =
         render_table(%{
-          meta: %AshPagify.Meta{
+          meta: %Meta{
             ash_pagify: %AshPagify{order_by: [email: :desc]}
           }
         })
@@ -2040,7 +2040,7 @@ defmodule AshPagify.ComponentsTest do
     test "only renders order direction symbol for first order field" do
       html =
         render_table(%{
-          meta: %AshPagify.Meta{
+          meta: %Meta{
             ash_pagify: %AshPagify{
               order_by: [name: :asc, email: :desc]
             }
@@ -2064,7 +2064,7 @@ defmodule AshPagify.ComponentsTest do
     test "allows to set symbol class" do
       html =
         render_table(%{
-          meta: %AshPagify.Meta{
+          meta: %Meta{
             ash_pagify: %AshPagify{order_by: [name: :asc]}
           },
           opts: [symbol_attrs: [class: "other-class"]]
@@ -2076,7 +2076,7 @@ defmodule AshPagify.ComponentsTest do
     test "allows to override default symbols" do
       html =
         render_table(%{
-          meta: %AshPagify.Meta{
+          meta: %Meta{
             ash_pagify: %AshPagify{order_by: [name: :asc]}
           },
           opts: [symbol_asc: "asc"]
@@ -2087,7 +2087,7 @@ defmodule AshPagify.ComponentsTest do
 
       html =
         render_table(%{
-          meta: %AshPagify.Meta{
+          meta: %Meta{
             ash_pagify: %AshPagify{order_by: [name: :desc]}
           },
           opts: [symbol_desc: "desc"]
@@ -2100,7 +2100,7 @@ defmodule AshPagify.ComponentsTest do
     test "allows to set indicator for unsorted column" do
       html =
         render_table(%{
-          meta: %AshPagify.Meta{
+          meta: %Meta{
             ash_pagify: %AshPagify{order_by: [name: :asc]}
           },
           opts: [symbol_unsorted: "random"]
@@ -2214,7 +2214,7 @@ defmodule AshPagify.ComponentsTest do
     end
 
     test "renders table action" do
-      assigns = %{meta: %AshPagify.Meta{ash_pagify: %AshPagify{}}}
+      assigns = %{meta: %Meta{ash_pagify: %AshPagify{}}}
 
       html =
         parse_heex(~H"""
@@ -2384,7 +2384,7 @@ defmodule AshPagify.ComponentsTest do
     end
 
     test "doesn't render colgroup on action col if no style attribute is set" do
-      assigns = %{meta: %AshPagify.Meta{ash_pagify: %AshPagify{}}}
+      assigns = %{meta: %Meta{ash_pagify: %AshPagify{}}}
 
       html =
         parse_heex(~H"""
@@ -2415,7 +2415,7 @@ defmodule AshPagify.ComponentsTest do
     end
 
     test "renders caption slot" do
-      assigns = %{meta: %AshPagify.Meta{ash_pagify: %AshPagify{}}}
+      assigns = %{meta: %Meta{ash_pagify: %AshPagify{}}}
 
       html =
         parse_heex(~H"""
@@ -2461,7 +2461,7 @@ defmodule AshPagify.ComponentsTest do
                        __changed__: nil,
                        col: fn _ -> nil end,
                        items: [%{name: "George"}],
-                       meta: %AshPagify.Meta{ash_pagify: %AshPagify{}}
+                       meta: %Meta{ash_pagify: %AshPagify{}}
                      )
                    end
     end
@@ -2549,10 +2549,10 @@ defmodule AshPagify.ComponentsTest do
 
   describe "build_path/3" do
     test "gets the for option from the meta struct to retrieve defaults" do
-      meta = %AshPagify.Meta{resource: Post, ash_pagify: %AshPagify{limit: 21}}
+      meta = %Meta{resource: Post, ash_pagify: %AshPagify{limit: 21}}
       assert build_path("/posts", meta) == "/posts?limit=21"
 
-      meta = %AshPagify.Meta{resource: Post, ash_pagify: %AshPagify{limit: 15}}
+      meta = %Meta{resource: Post, ash_pagify: %AshPagify{limit: 15}}
       assert build_path("/posts", meta) == "/posts"
     end
   end

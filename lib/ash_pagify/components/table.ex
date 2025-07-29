@@ -341,7 +341,7 @@ defmodule AshPagify.Components.Table do
   defp build_path(nil, _, _, _), do: nil
 
   defp build_path(path, meta, field, opts) do
-    AshPagify.Components.build_path(
+    Components.build_path(
       path,
       AshPagify.push_order(meta.ash_pagify, field, opts),
       for: meta.resource,

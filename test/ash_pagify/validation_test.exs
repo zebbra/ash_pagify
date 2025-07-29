@@ -19,7 +19,7 @@ defmodule AshPagify.ValidationTest do
   alias AshPagify.Misc
   alias AshPagify.Validation
 
-  doctest AshPagify.Validation, import: true
+  doctest Validation, import: true
 
   test "passes with empty params and resource" do
     assert {:ok, %AshPagify{limit: 15, offset: 0, scopes: %{status: :all}}} ==

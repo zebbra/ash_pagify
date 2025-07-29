@@ -12,7 +12,7 @@ defmodule AshPagify.FilterFormTest do
 
   require Ash.Query
 
-  doctest AshPagify.FilterForm, import: true
+  doctest FilterForm, import: true
 
   defp form_for(thing, _) do
     Phoenix.HTML.FormData.to_form(thing, [])
@@ -682,7 +682,7 @@ defmodule AshPagify.FilterFormTest do
           reset_on_change?: false
         )
 
-      assert not is_nil(Enum.at(form.components, 0).value)
+      assert Enum.at(form.components, 0).value
     end
 
     test "the form names for deeply nested components are correct" do
