@@ -34,7 +34,7 @@ jobs:
 
       - name: Restore cache
         id: cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: |
             deps
@@ -50,7 +50,7 @@ jobs:
       - run: mix dialyzer --plt
 
       - name: Save cache
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           path: |
