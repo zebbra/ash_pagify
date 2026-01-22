@@ -2522,6 +2522,38 @@ defmodule AshPagify.ComponentsTest do
       refute Keyword.has_key?(query, :order_by)
     end
 
+    test "full round trip: parse name_lower from URL, render pagination, verify links" do
+      url_params = %{"order_by" => ["-name_lower"], "offset" => "10", "limit" => "10"}
+
+      ash_pagify = AshPagify.validate!(Post, url_params)
+
+      assert [{%Ash.Query.Calculation{calc_name: :name_lower}, :desc}] = ash_pagify.order_by
+      assert ash_pagify.offset == 10
+      assert ash_pagify.limit == 10
+
+      meta = build(:meta_on_second_page, ash_pagify: ash_pagify)
+
+      assigns = %{meta: meta}
+
+      html =
+        parse_heex(~H"""
+        <AshPagify.Components.pagination meta={@meta} path="/posts" />
+        """)
+
+      assert previous = find_one(html, "a:fl-contains('Previous')")
+      assert href = attribute(previous, "href")
+      assert href =~ "order_by[]=-name_lower"
+      assert href =~ "limit=10"
+
+      assert next = find_one(html, "a:fl-contains('Next')")
+      assert href = attribute(next, "href")
+      assert href =~ "order_by[]=-name_lower"
+
+      assert page_link = find_one(html, "a[aria-label='Go to page 1']")
+      assert href = attribute(page_link, "href")
+      assert href =~ "order_by[]=-name_lower"
+    end
+
     test "does not add scopes params if they match the default" do
       opts = [
         default_scopes: %{status: :active}
