@@ -69,6 +69,8 @@ defmodule AshPagify.Factory.Post do
       public? true
       argument :add, :integer, allow_nil?: false
     end
+
+    calculate :name_lower, :string, expr(fragment("lower(?)", name)), public?: true
   end
 
   aggregates do

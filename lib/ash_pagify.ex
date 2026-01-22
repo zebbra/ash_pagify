@@ -5,6 +5,8 @@ defmodule AshPagify do
              |> Enum.fetch!(1)
 
   alias Ash.Page.Offset
+  alias Ash.Query.Aggregate
+  alias Ash.Query.Calculation
   alias AshPagify.Error.Query.InvalidDirectionsError
   alias AshPagify.FilterForm
   alias AshPagify.Meta
@@ -628,13 +630,25 @@ defmodule AshPagify do
 
   def concat_sort([field | rest], acc) do
     case field do
-      {field, order} ->
+      {%Calculation{calc_name: field}, order} ->
+        concat_sort(rest, ["#{order_to_prefix(order)}#{Atom.to_string(field)}" | acc])
+
+      {%Aggregate{agg_name: field}, order} ->
+        concat_sort(rest, ["#{order_to_prefix(order)}#{Atom.to_string(field)}" | acc])
+
+      {field, order} when is_atom(field) ->
         concat_sort(rest, ["#{order_to_prefix(order)}#{Atom.to_string(field)}" | acc])
 
       field when is_binary(field) ->
         concat_sort(rest, [field | acc])
 
       field when is_atom(field) ->
+        concat_sort(rest, [Atom.to_string(field) | acc])
+
+      %Calculation{calc_name: field} ->
+        concat_sort(rest, [Atom.to_string(field) | acc])
+
+      %Aggregate{agg_name: field} ->
         concat_sort(rest, [Atom.to_string(field) | acc])
     end
   end
