@@ -5,6 +5,23 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v1.5.0](https://github.com/zebbra/ash_pagify/compare/v1.4.3...v1.5.0) (2026-01-22)
+
+
+
+
+### Features:
+
+* add support for order_by on a calculation and / or aggregation by Dave LI
+
+### Bug Fixes:
+
+* deps: remove unused by Michael Bärtschi
+
+* sort: and update styler by Michael Bärtschi
+
+* deps: remove unused by Michael Bärtschi
+
 ## [v1.4.3](https://github.com/zebbra/ash_pagify/compare/v1.4.2...v1.4.3) (2025-05-21)
 
 
