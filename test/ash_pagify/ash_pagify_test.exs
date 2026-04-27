@@ -7,6 +7,7 @@ defmodule AshPagifyTest do
   alias Ash.Error.Query.InvalidLimit
   alias Ash.Error.Query.NoSuchField
   alias Ash.Page.Offset
+  alias Ash.Query.Calculation
   alias AshPagify.Error.Query.InvalidParamsError
   alias AshPagify.Error.Query.SearchNotImplemented
   alias AshPagify.Factory.Comment
@@ -768,6 +769,15 @@ defmodule AshPagifyTest do
       # If the `order_by` parameter is `nil`, the function will return `nil`.
       assert AshPagify.get_index(nil, :name) == nil
     end
+
+    test "returns index for Calculation and Aggregate structs in order_by" do
+      # Calculations are stored as structs after AshPagify.validate!/2
+      %{order_by: calc_order_by} = AshPagify.validate!(Post, %{"order_by" => ["name_lower"]})
+      assert [{%Calculation{calc_name: :name_lower}, :asc}] = calc_order_by
+
+      assert AshPagify.get_index(calc_order_by, :name_lower) == 0
+      assert AshPagify.get_index(calc_order_by, :name) == nil
+    end
   end
 
   describe "push_order/3" do
@@ -778,6 +788,16 @@ defmodule AshPagifyTest do
           AshPagify.push_order(ash_pagify, :name, directions: directions)
         end
       end
+    end
+
+    test "toggles sort direction for calculation fields" do
+      # After validation, name_lower is stored as a Calculation struct in order_by
+      ash_pagify = AshPagify.validate!(Post, %{"order_by" => ["name_lower"]})
+      assert [{%Calculation{calc_name: :name_lower}, :asc}] = ash_pagify.order_by
+
+      # Clicking the column header again should toggle from asc to desc
+      result = AshPagify.push_order(ash_pagify, :name_lower)
+      assert [{:name_lower, :desc}] = result.order_by
     end
   end
 

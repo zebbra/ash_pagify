@@ -328,6 +328,12 @@ defmodule AshPagify.Components.Table do
     """
   end
 
+  defp order_direction(%AshPagify{order_by: [{%Ash.Query.Calculation{calc_name: field}, direction} | _]}, field),
+    do: direction
+
+  defp order_direction(%AshPagify{order_by: [{%Ash.Query.Aggregate{agg_name: field}, direction} | _]}, field),
+    do: direction
+
   defp order_direction(%AshPagify{order_by: [{field, direction} | _]}, field), do: direction
   defp order_direction(_ash_pagify, _field), do: nil
 

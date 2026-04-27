@@ -2162,6 +2162,8 @@ defmodule AshPagify do
   def get_index(order_by, field) do
     Enum.find_index(order_by, fn item ->
       case item do
+        {%Calculation{calc_name: f}, _} -> f == field
+        {%Aggregate{agg_name: f}, _} -> f == field
         {f, _} -> f == field
         f when is_binary(f) -> String.to_existing_atom(f) == field
         f -> f == field
