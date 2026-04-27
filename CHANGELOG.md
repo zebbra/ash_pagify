@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v1.5.1](https://github.com/zebbra/ash_pagify/compare/v1.5.0...v1.5.1) (2026-04-27)
+
+
+
+
+### Bug Fixes:
+
+* sort direction toggle broken for calculation and aggregate fields by Michael Bärtschi
+
 ## [v1.5.0](https://github.com/zebbra/ash_pagify/compare/v1.4.3...v1.5.0) (2026-01-22)
 
 
