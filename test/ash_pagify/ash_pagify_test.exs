@@ -1034,7 +1034,7 @@ defmodule AshPagifyTest do
   describe "query_for_filters_map/2" do
     test "converts compiled filters to map" do
       assert AshPagify.query_for_filters_map(Post, %{"and" => [%{"name" => "foo"}]}) ==
-               Ash.Query.filter(Post, %{name: "foo"})
+               Ash.Query.filter_input(Post, %{name: "foo"})
     end
 
     test "does not include full_text_search if disabled" do
@@ -1043,7 +1043,7 @@ defmodule AshPagifyTest do
                %{"and" => [%{"name" => "foo"}], "__full_text_search" => "bar"},
                include_full_text_search?: false
              ) ==
-               Ash.Query.filter(Post, %{name: "foo"})
+               Ash.Query.filter_input(Post, %{name: "foo"})
     end
 
     test "includes full_text_search per default and orders by ts_rank if no order_by is provided" do
@@ -1084,7 +1084,7 @@ defmodule AshPagifyTest do
                Post,
                %{"name" => "bar"}
              ) ==
-               Ash.Query.filter(Post, name: "bar")
+               Ash.Query.filter_input(Post, %{name: "bar"})
     end
 
     test "does not include full_text_search if none is configured and does not raise" do
@@ -1093,7 +1093,7 @@ defmodule AshPagifyTest do
                %{"and" => [%{"name" => "foo"}], "__full_text_search" => %{"search" => "bar"}},
                raise_on_invalid_search?: false
              ) ==
-               Ash.Query.filter(User, %{name: "foo"})
+               Ash.Query.filter_input(User, %{name: "foo"})
     end
 
     test "does not include full_text_search if none is configured and raises" do
