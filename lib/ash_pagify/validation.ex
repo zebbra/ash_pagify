@@ -629,19 +629,34 @@ defmodule AshPagify.Validation do
     end
   end
 
+  # Validates each order_by entry on its own, keeping the ones that parse
+  # and recording an error for each that doesn't.
+  #
+  # The previous implementation removed the failing entry with
+  # `List.delete(order_by, error.field)` and recursed. But `error.field` is
+  # the parsed field name, not the raw entry — for a direction-prefixed
+  # entry (`"-non_existent"` → field `"non_existent"`) or a related path
+  # (`"author.name"` → field `"name"`) the two differ, so nothing was
+  # removed and the function recursed on identical input forever, appending
+  # an error every iteration (unbounded memory growth). Since `order_by`
+  # comes from user-controllable params, that made a single crafted value
+  # (e.g. `?order_by[]=author.name`) a denial-of-service against any caller
+  # using `replace_invalid_params?: true`.
+  #
+  # Parsing per entry sidesteps the `error.field`/entry mismatch entirely
+  # and always terminates.
   defp replace_invalid_order_by(order_by, params, resource) do
-    case Ash.Sort.parse_input(resource, order_by) do
-      {:ok, order_by} ->
-        if order_by == [] do
-          Map.put(params, :order_by, nil)
-        else
-          Map.put(params, :order_by, order_by)
+    {valid_reversed, params} =
+      Enum.reduce(order_by, {[], params}, fn entry, {valid, params} ->
+        case Ash.Sort.parse_input(resource, [entry]) do
+          {:ok, parsed} -> {Enum.reverse(parsed, valid), params}
+          {:error, error} -> {valid, add_error(params, :order_by, error)}
         end
+      end)
 
-      {:error, error} ->
-        params = add_error(params, :order_by, error)
-        order_by = List.delete(order_by, error.field)
-        replace_invalid_order_by(order_by, params, resource)
+    case Enum.reverse(valid_reversed) do
+      [] -> Map.put(params, :order_by, nil)
+      order_by -> Map.put(params, :order_by, order_by)
     end
   end
 
