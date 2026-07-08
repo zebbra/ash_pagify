@@ -604,6 +604,46 @@ defmodule AshPagify.ValidationTest do
                  replace_invalid_params?: true
                )
     end
+
+    # Regression: entries whose parsed field name differs from the raw entry
+    # (a direction prefix, or a dotted path) used to loop forever under
+    # replace_invalid_params?: true, because the recovery removed
+    # `error.field` from the list and `error.field` never matched the entry.
+    # Since order_by is user-controllable, that was a DoS. The timeouts make
+    # a regression fail fast instead of hanging the whole suite.
+
+    @tag timeout: 5_000
+    test "replaces a direction-prefixed invalid entry without looping" do
+      assert %{
+               order_by: [name: :desc],
+               errors: [order_by: [%NoSuchField{}]]
+             } =
+               Validation.validate_order_by(%{order_by: ["-name", "-non_existent"]},
+                 for: Post,
+                 replace_invalid_params?: true
+               )
+    end
+
+    @tag timeout: 5_000
+    test "replaces a dotted-path invalid entry without looping" do
+      assert %{
+               order_by: nil,
+               errors: [order_by: [_error]]
+             } =
+               Validation.validate_order_by(%{order_by: ["non_existent.name"]},
+                 for: Post,
+                 replace_invalid_params?: true
+               )
+    end
+
+    @tag timeout: 5_000
+    test "drops every invalid entry and keeps the valid ones" do
+      assert %{order_by: [name: :asc]} =
+               Validation.validate_order_by(%{order_by: ["name", "-bogus", "x.y"]},
+                 for: Post,
+                 replace_invalid_params?: true
+               )
+    end
   end
 
   describe "validate_pagination/2" do
