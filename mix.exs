@@ -5,7 +5,7 @@ defmodule AshPagify.MixProject do
   Adds full-text search, scoping, filtering, ordering, and pagination APIs for the Ash Framework.
   """
 
-  @version "1.5.1"
+  @version "1.5.2"
 
   def project do
     [
