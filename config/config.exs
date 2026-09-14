@@ -7,6 +7,8 @@
 # General application configuration
 import Config
 
+config :ash, default_string_length_count: :codepoints
+
 config :ash_pagify,
   ash_domains: [],
   env: Mix.env()
