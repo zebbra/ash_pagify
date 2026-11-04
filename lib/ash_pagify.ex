@@ -414,7 +414,7 @@ defmodule AshPagify do
   See the documentation for `AshPagify.validate_and_run/4` for supported options.
   """
   @spec run(Ash.Query.t() | Ash.Resource.t(), AshPagify.t(), Keyword.t(), any()) ::
-          {[Ash.Resource.record()], Meta.t()}
+          {[Ash.Resource.Record.t()], Meta.t()}
   def run(query_or_resource, ash_pagify, opts \\ [], args \\ nil)
 
   def run(%Ash.Query{} = q, %AshPagify{} = ash_pagify, opts, args) do
@@ -475,7 +475,7 @@ defmodule AshPagify do
           Keyword.t(),
           any()
         ) ::
-          {:ok, {[Ash.Resource.record()], Meta.t()}} | {:error, Meta.t()}
+          {:ok, {[Ash.Resource.Record.t()], Meta.t()}} | {:error, Meta.t()}
   def validate_and_run(query_or_resource, map_or_ash_pagify, opts \\ [], args \\ nil) do
     opts =
       query_or_resource
@@ -496,7 +496,7 @@ defmodule AshPagify do
           Keyword.t(),
           any()
         ) ::
-          {[Ash.Resource.record()], Meta.t()}
+          {[Ash.Resource.Record.t()], Meta.t()}
   def validate_and_run!(query_or_resource, map_or_ash_pagify, opts \\ [], args \\ nil) do
     opts =
       query_or_resource
@@ -1319,8 +1319,7 @@ defmodule AshPagify do
   def to_previous_offset(%AshPagify{offset: 0} = ash_pagify), do: ash_pagify
 
   def to_previous_offset(%AshPagify{offset: offset, limit: limit} = ash_pagify)
-      when is_integer(limit) and is_integer(offset),
-      do: %{ash_pagify | offset: max(0, offset - limit)}
+      when is_integer(limit) and is_integer(offset), do: %{ash_pagify | offset: max(0, offset - limit)}
 
   @doc """
   Sets the offset of a AshPagify struct to the next page depending on the limit.
@@ -1351,12 +1350,10 @@ defmodule AshPagify do
   def to_next_offset(ash_pagify, total_count \\ nil)
 
   def to_next_offset(%AshPagify{limit: limit, offset: offset} = ash_pagify, _)
-      when is_integer(limit) and is_integer(offset) and offset < 0,
-      do: %{ash_pagify | offset: 0}
+      when is_integer(limit) and is_integer(offset) and offset < 0, do: %{ash_pagify | offset: 0}
 
   def to_next_offset(%AshPagify{limit: limit, offset: offset} = ash_pagify, nil)
-      when is_integer(limit) and is_integer(offset),
-      do: %{ash_pagify | offset: offset + limit}
+      when is_integer(limit) and is_integer(offset), do: %{ash_pagify | offset: offset + limit}
 
   def to_next_offset(%AshPagify{limit: limit, offset: offset} = ash_pagify, total_count)
       when is_integer(limit) and is_integer(offset) and is_integer(total_count) and offset >= total_count do
@@ -1753,8 +1750,8 @@ defmodule AshPagify do
 
   defp maybe_store_full_text_search(%AshPagify{search: ""} = ash_pagify, _resource, _opts), do: ash_pagify
 
-  defp maybe_store_full_text_search(%AshPagify{search: search} = ash_pagify, resource, opts) do
-    if search != nil and Keyword.get(opts, :include_full_text_search?, true) do
+  defp maybe_store_full_text_search(%AshPagify{} = ash_pagify, resource, opts) do
+    if Keyword.get(opts, :include_full_text_search?, true) do
       store_full_text_search(ash_pagify, resource, opts)
     else
       ash_pagify
@@ -2222,20 +2219,16 @@ defmodule AshPagify do
   defp new_order_direction(0, current_direction, nil), do: reverse_direction(current_direction)
 
   defp new_order_direction(0, current_direction, {_asc, desc})
-       when is_asc_direction(current_direction) and is_desc_direction(desc),
-       do: desc
+       when is_asc_direction(current_direction) and is_desc_direction(desc), do: desc
 
   defp new_order_direction(0, current_direction, {desc, _asc})
-       when is_asc_direction(current_direction) and is_desc_direction(desc),
-       do: desc
+       when is_asc_direction(current_direction) and is_desc_direction(desc), do: desc
 
   defp new_order_direction(0, current_direction, {asc, _desc})
-       when is_desc_direction(current_direction) and is_asc_direction(asc),
-       do: asc
+       when is_desc_direction(current_direction) and is_asc_direction(asc), do: asc
 
   defp new_order_direction(0, current_direction, {_desc, asc})
-       when is_desc_direction(current_direction) and is_asc_direction(asc),
-       do: asc
+       when is_desc_direction(current_direction) and is_asc_direction(asc), do: asc
 
   defp new_order_direction(0, _current_direction, directions) do
     raise InvalidDirectionsError, directions: directions

@@ -609,8 +609,9 @@ defmodule AshPagify.Misc do
   def remove_nil_values(map_or_struct)
   def remove_nil_values(nil), do: nil
 
-  def remove_nil_values(struct) when is_atom(struct) do
-    struct
+  def remove_nil_values(module) when is_atom(module) do
+    module
+    |> struct()
     |> Map.from_struct()
     |> remove_nil_values()
   end

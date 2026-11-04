@@ -486,16 +486,7 @@ defmodule AshPagify.FilterForm do
   """
   def to_filter_expression(form) do
     if form.valid? do
-      case do_to_filter_expression(form, form.resource) do
-        {:ok, expr} ->
-          {:ok, expr}
-
-        {:error, %__MODULE__{} = form} ->
-          {:error, form}
-
-        {:error, error} ->
-          {:error, %{form | errors: List.wrap(error)}}
-      end
+      do_to_filter_expression(form, form.resource)
     else
       {:error, form}
     end
